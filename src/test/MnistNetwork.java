@@ -53,11 +53,11 @@ public class MnistNetwork {
 		PoolMaxLayer pool1 = new PoolMaxLayer(network,new BlobParams(network.getBatch(),6,14,14),new BlobParams(1,6,2,2),2,2);
 		network.addLayer(pool1);
 		
-		ConvolutionLayer conv2 = new ConvolutionLayer(network,new BlobParams(network.getBatch(),12,14,14),new BlobParams(1,12,3,3));
+		ConvolutionLayer conv2 = new ConvolutionLayer(network,new BlobParams(network.getBatch(),24,14,14),new BlobParams(1,24,3,3));
 		conv2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(conv2);
 		
-		PoolMaxLayer pool2 = new PoolMaxLayer(network,new BlobParams(network.getBatch(),12,7,7),new BlobParams(1,12,2,2),2,2);
+		PoolMaxLayer pool2 = new PoolMaxLayer(network,new BlobParams(network.getBatch(),24,7,7),new BlobParams(1,24,2,2),2,2);
 		network.addLayer(pool2);
 		
 		FullConnectionLayer fc1 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),512,1,1));
@@ -78,7 +78,7 @@ public class MnistNetwork {
 		network.setBatch(80);
 		network.setLoss(new LogLikeHoodLoss());
 		//network.setLoss(new CrossEntropyLoss());
-		optimizer = new SGDOptimizer(0.5);
+		optimizer = new SGDOptimizer(2.0);
 		network.setOptimizer(optimizer);
 		
 		//buildFcNetwork();
@@ -167,7 +167,7 @@ public class MnistNetwork {
 				List<Blob> inputAndLabel = buildBlobByImageList(imgList,i,batch,1,28,28);
 				double lossValue = network.train(inputAndLabel.get(0), inputAndLabel.get(1));
 				
-				if(i>batch && i/batch%50==0){
+				if(i>batch && i/batch%10==0){
 					System.out.print("lossValue is "+lossValue+"  "+" lr "+optimizer.getLr()+"  ");
 					testInner(inputAndLabel.get(0), inputAndLabel.get(1));
 				}
