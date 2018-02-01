@@ -19,7 +19,11 @@ CupCnn是我在学习卷积神经网络的时候自己尝试写的，写出来后，希望能给那些还在学习卷
 目前，在mnist数据集上，仅全连接层的神经网络和卷积神经网络的准确率都能超过95%。最好的成绩还没能超过96%,可能是
 实现上有一些细微的bug,也可能是训练的还不到位。不管怎么样，我会进一步调试和完善CupCnn.
 
-	
+## 使用<br>
+目前，CupCnn实现了mnist数据集上的测试，在src/test下，MnistTest是main函数的入口，具体的神经网络的
+搭建在MnistNetwork类中。在MnistNetwork类中，buildConvNetwork和buildFcNetwork分别实现
+了搭建卷积神经网络和搭建全连接神经网络。得益于java良好的跨平台属性，你下载完CupCnn的源码后直接运行，应该就能
+开启mnist数据集的训练和测试。
 	
 			
 
