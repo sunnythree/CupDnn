@@ -14,6 +14,7 @@ import cupcnn.layer.ConvolutionLayer;
 import cupcnn.layer.FullConnectionLayer;
 import cupcnn.layer.InputLayer;
 import cupcnn.layer.PoolMaxLayer;
+import cupcnn.layer.PoolMeanLayer;
 import cupcnn.layer.SoftMaxLayer;
 import cupcnn.loss.CrossEntropyLoss;
 import cupcnn.loss.LogLikeHoodLoss;
@@ -57,7 +58,7 @@ public class MnistNetwork {
 		conv2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(conv2);
 		
-		PoolMaxLayer pool2 = new PoolMaxLayer(network,new BlobParams(network.getBatch(),24,7,7),new BlobParams(1,24,2,2),2,2);
+		PoolMeanLayer pool2 = new PoolMeanLayer(network,new BlobParams(network.getBatch(),24,7,7),new BlobParams(1,24,2,2),2,2);
 		network.addLayer(pool2);
 		
 		FullConnectionLayer fc1 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),512,1,1));
@@ -75,10 +76,10 @@ public class MnistNetwork {
 	public void buildNetwork(){
 		//首先构建神经网络对象，并设置参数
 		network = new Network();
-		network.setBatch(80);
+		network.setBatch(100);
 		network.setLoss(new LogLikeHoodLoss());
 		//network.setLoss(new CrossEntropyLoss());
-		optimizer = new SGDOptimizer(2.0);
+		optimizer = new SGDOptimizer(1.0);
 		network.setOptimizer(optimizer);
 		
 		//buildFcNetwork();
@@ -167,7 +168,7 @@ public class MnistNetwork {
 				List<Blob> inputAndLabel = buildBlobByImageList(imgList,i,batch,1,28,28);
 				double lossValue = network.train(inputAndLabel.get(0), inputAndLabel.get(1));
 				
-				if(i>batch && i/batch%10==0){
+				if(i>batch && i/batch%50==0){
 					System.out.print("lossValue is "+lossValue+"  "+" lr "+optimizer.getLr()+"  ");
 					testInner(inputAndLabel.get(0), inputAndLabel.get(1));
 				}
@@ -194,7 +195,7 @@ public class MnistNetwork {
 			}
 		}
 		
-		double accuracy = correctCount/(1.0*i);
+		double accuracy = correctCount/(1.0*i+batch);
 		System.out.println("test accuracy is "+accuracy+" correctCount "+correctCount);
 	}
 }

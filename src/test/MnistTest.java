@@ -33,7 +33,7 @@ public class MnistTest {
 		
 		MnistNetwork mn = new MnistNetwork();
 		mn.buildNetwork();
-		mn.train(trains,5);
+		mn.train(trains,30);
 		mn.test(tests);
 	}
 
