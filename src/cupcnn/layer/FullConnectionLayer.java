@@ -3,14 +3,24 @@ package cupcnn.layer;
 import cupcnn.data.Blob;
 import cupcnn.data.BlobParams;
 import cupcnn.util.MathFunctions;
+
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+
 import cupcnn.Network;
+import cupcnn.active.ReluActivationFunc;
+import cupcnn.active.SigmodActivationFunc;
+import cupcnn.active.TanhActivationFunc;
 
 public class FullConnectionLayer extends Layer{
+	public static final String TYPE = "FullConnectionLayer";
 	private Blob w;
-	private Blob wGradient;
+	private transient Blob wGradient;
 	private Blob b;
-	private Blob bGradient;
-	private Blob z;
+	private transient Blob bGradient;
+	private transient Blob z;
 	
 	public FullConnectionLayer(Network network,BlobParams layerParams){
 		super(network,layerParams);
@@ -21,21 +31,28 @@ public class FullConnectionLayer extends Layer{
 		// TODO Auto-generated method stub
 		Blob input = mNetwork.getDatas().get(id-1);
 		Blob output = mNetwork.getDatas().get(id);
-		//表明该层公有output.get3DSize()个神经元，每个神经元和前面层的input.get3DSize()个神经元向连
-		w = new Blob(output.get3DSize(),input.get3DSize(),1,1);
+		
+		if(w==null && b==null){
+			//表明该层公有output.get3DSize()个神经元，每个神经元和前面层的input.get3DSize()个神经元向连
+			w = new Blob(output.get3DSize(),input.get3DSize(),1,1);
+
+			//表明公有output.getChannels()个神经元，每个神经元有一个偏执
+			b = new Blob(output.get3DSize(),1,1,1);
+
+
+			//初始化
+			double[] wData = w.getData();
+			double[] bData = b.getData();
+			//高斯分布初始化w
+			MathFunctions.gaussianInitData(wData);
+			//常量初始化b
+			MathFunctions.constantInitData(bData, 0.1);
+		}
+		assert w!=null && b!=null:"FullConnectionLayer prepare---w or b is null error";
 		wGradient = new Blob(w.getNumbers(),w.getChannels(),1,1);
-		//表明公有output.getChannels()个神经元，每个神经元有一个偏执
-		b = new Blob(output.get3DSize(),1,1,1);
 		bGradient = new Blob(b.getNumbers(),b.getChannels(),1,1);
 		//z是个中间值，计算的时候要用到。
 		z = new Blob(output.getNumbers(),output.get3DSize(),1,1);
-		//初始化
-		double[] wData = w.getData();
-		double[] bData = b.getData();
-		//高斯分布初始化w
-		MathFunctions.gaussianInitData(wData);
-		//常量初始化b
-		MathFunctions.constantInitData(bData, 0.1);
 	}
 
 	@Override
@@ -103,7 +120,7 @@ public class FullConnectionLayer extends Layer{
 			}
 		}
 		//平均
-		MathFunctions.dataDivConstant(wGradientData, wGradient.getNumbers());
+		MathFunctions.dataDivConstant(wGradientData, input.getNumbers());
 		
 		//update bias
 		bGradient.fillValue(0);
@@ -114,12 +131,12 @@ public class FullConnectionLayer extends Layer{
 		}
 
 		//平均
-		MathFunctions.dataDivConstant(bGradientData, bGradient.getNumbers());
+		MathFunctions.dataDivConstant(bGradientData, input.getNumbers());
 		
 		//最后，乘以当前层的权重后输出
 		//每一个输出=每一个神经元与连接他的权重的乘加
 		if(id<=1)return;
-		
+		outputDiff.fillValue(0);
 		for(int n = 0; n < outputDiff.getNumbers();n++){
 			for(int ids = 0; ids < inputDiff.get3DSize(); ids++){
 				for(int ods = 0; ods < outputDiff.get3DSize(); ods++){
@@ -138,10 +155,54 @@ public class FullConnectionLayer extends Layer{
 
 	}
 
+
 	@Override
 	public String getType() {
 		// TODO Auto-generated method stub
-		return "FullConnectionLayer";
+		return TYPE;
+	}
+
+	@Override
+	public void saveModel(ObjectOutputStream out) {
+		// TODO Auto-generated method stub
+		try {
+			out.writeUTF(getType());
+			//保存的时候，batch也就是layerParams的number总是1，因为predict的时候，因为真正使用的时候，这个batch一般都是1
+			layerParams.setNumbers(1);
+			out.writeObject(layerParams);
+			out.writeObject(w);
+			out.writeObject(b);
+			if(activationFunc != null){
+				out.writeUTF(activationFunc.getType());
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+
+	@Override
+	public void loadModel(ObjectInputStream in) {
+		// TODO Auto-generated method stub
+		try {
+			w = (Blob) in.readObject();
+			b = (Blob) in.readObject();
+			String activationType = in.readUTF();
+			if(activationType.equals(ReluActivationFunc.TYPE)){
+				setActivationFunc(new ReluActivationFunc());
+			}else if(activationType.equals(SigmodActivationFunc.TYPE)){
+				setActivationFunc(new SigmodActivationFunc());
+			}else if(activationType.equals(TanhActivationFunc.TYPE)){
+				setActivationFunc(new TanhActivationFunc());
+			}
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 

@@ -1,11 +1,16 @@
 package cupcnn.layer;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 import cupcnn.Network;
 import cupcnn.data.Blob;
 import cupcnn.data.BlobParams;
 
 public class SoftMaxLayer extends Layer{
-
+	public static final String TYPE = "SoftMaxLayer";
+	
 	public SoftMaxLayer(Network network, BlobParams parames) {
 		super(network, parames);
 		// TODO Auto-generated constructor stub
@@ -14,7 +19,7 @@ public class SoftMaxLayer extends Layer{
 	@Override
 	public String getType() {
 		// TODO Auto-generated method stub
-		return "SoftMaxLayer";
+		return TYPE;
 	}
 
 	@Override
@@ -34,30 +39,34 @@ public class SoftMaxLayer extends Layer{
 	
 		for(int n=0;n<input.getNumbers();n++){
 			double sum = 0.0;
-//			double max = 0.0;
+			double max = 0.01;
 			
-//			//查找最大值
-//			for(int is=0;is<input.get3DSize();is++){
-//				max = Math.max(max, inputData[n*input.get3DSize()+is]);
-//			}
-//			//求和
-//			for(int is=0;is<input.get3DSize();is++){
-//				outputData[n*input.get3DSize()+is] = Math.exp(inputData[n*input.get3DSize()+is]-max);
-//				sum += outputData[n*input.get3DSize()+is];
-//			}
-//			//每一项除以sum
-//			for(int os=0;os<output.get3DSize();os++){
-//				outputData[n*output.get3DSize()+os] = outputData[n*output.get3DSize()+os]/sum;
-//			}
-			
+			//查找最大值
+			for(int is=0;is<input.get3DSize();is++){
+				max = Math.max(max, inputData[n*input.get3DSize()+is]);
+			}
 			//求和
 			for(int is=0;is<input.get3DSize();is++){
-				sum += Math.exp(inputData[n*input.get3DSize()+is]);
+				outputData[n*input.get3DSize()+is] = Math.exp(inputData[n*input.get3DSize()+is]-max);
+				sum += outputData[n*input.get3DSize()+is];
+			}
+			if(sum==0){
+				System.out.println("sum is zero");
+				System.exit(0);
 			}
 			//每一项除以sum
 			for(int os=0;os<output.get3DSize();os++){
-				outputData[n*output.get3DSize()+os] = Math.exp(inputData[n*output.get3DSize()+os])/sum;
+				outputData[n*output.get3DSize()+os] = outputData[n*output.get3DSize()+os]/sum;
 			}
+			
+//			//求和
+//			for(int is=0;is<input.get3DSize();is++){
+//				sum += Math.exp(inputData[n*input.get3DSize()+is]);
+//			}
+//			//每一项除以sum
+//			for(int os=0;os<output.get3DSize();os++){
+//				outputData[n*output.get3DSize()+os] = Math.exp(inputData[n*output.get3DSize()+os])/sum;
+//			}
 		}
 	}
 
@@ -87,6 +96,26 @@ public class SoftMaxLayer extends Layer{
 				}
 			}
 		}
+	}
+
+	@Override
+	public void saveModel(ObjectOutputStream out) {
+		// TODO Auto-generated method stub
+		try {
+			out.writeUTF(getType());
+			//保存的时候，batch也就是layerParams的number总是1，因为predict的时候，因为真正使用的时候，这个batch一般都是1
+			layerParams.setNumbers(1);
+			out.writeObject(layerParams);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public void loadModel(ObjectInputStream in) {
+		// TODO Auto-generated method stub
+		//do nothing
 	}
 
 }

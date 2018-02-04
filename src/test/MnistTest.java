@@ -2,16 +2,8 @@ package test;
 
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
-import cupcnn.Network;
-import cupcnn.active.ReluActivationFunc;
-import cupcnn.layer.FullConnectionLayer;
-import cupcnn.loss.CrossEntropyLoss;
-import cupcnn.optimizer.SGDOptimizer;
-import cupcnn.data.Blob;
 
 public class MnistTest {
 	static List<DigitImage> trains = null ;
@@ -33,8 +25,14 @@ public class MnistTest {
 		
 		MnistNetwork mn = new MnistNetwork();
 		mn.buildNetwork();
-		mn.train(trains,30);
+		mn.train(trains,1);
+		//mn.test(tests);
+		mn.saveModel("model/mnist.model");
+		
+		
+		mn.loadModel("model/mnist.model");
 		mn.test(tests);
+
 	}
 
 }

@@ -1,6 +1,7 @@
 package cupcnn.active;
 
 public class TanhActivationFunc extends ActivationFunc{
+	public static final String TYPE = "TanhActivationFunc";
 
 	private double tanh(double in){
 		double ef = Math.exp(in);
@@ -17,6 +18,11 @@ public class TanhActivationFunc extends ActivationFunc{
 	public double diffActive(double in) {
 		// TODO Auto-generated method stub
 		return (1-tanh(in)*tanh(in));
+	}
+	
+	@Override
+	public String getType(){
+		return TYPE;
 	}
 
 }

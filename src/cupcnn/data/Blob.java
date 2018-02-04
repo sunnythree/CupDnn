@@ -3,7 +3,13 @@ package cupcnn.data;
  *cupcnn的核心数据类
  */
 
-public class Blob {
+import java.io.Serializable;
+
+public class Blob implements Serializable{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private double[] data;
 	private int numbers;
 	private int channels;

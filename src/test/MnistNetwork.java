@@ -1,5 +1,11 @@
 package test;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,9 +39,9 @@ public class MnistNetwork {
 		FullConnectionLayer layer3 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),100,1,1));
 		layer3.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(layer3);
-//		FullConnectionLayer layer4 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),30,1,1));
-//		layer4.setActivationFunc(new SigmodActivationFunc());
-//		network.addLayer(layer4);
+		FullConnectionLayer layer4 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),30,1,1));
+		layer4.setActivationFunc(new SigmodActivationFunc());
+		network.addLayer(layer4);
 		FullConnectionLayer layer5 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),10,1,1));
 		layer5.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(layer5);
@@ -54,20 +60,24 @@ public class MnistNetwork {
 		PoolMaxLayer pool1 = new PoolMaxLayer(network,new BlobParams(network.getBatch(),6,14,14),new BlobParams(1,6,2,2),2,2);
 		network.addLayer(pool1);
 		
-		ConvolutionLayer conv2 = new ConvolutionLayer(network,new BlobParams(network.getBatch(),24,14,14),new BlobParams(1,24,3,3));
+		ConvolutionLayer conv2 = new ConvolutionLayer(network,new BlobParams(network.getBatch(),36,14,14),new BlobParams(1,36,3,3));
 		conv2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(conv2);
 		
-		PoolMeanLayer pool2 = new PoolMeanLayer(network,new BlobParams(network.getBatch(),24,7,7),new BlobParams(1,24,2,2),2,2);
+		PoolMeanLayer pool2 = new PoolMeanLayer(network,new BlobParams(network.getBatch(),36,7,7),new BlobParams(1,36,2,2),2,2);
 		network.addLayer(pool2);
 		
 		FullConnectionLayer fc1 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),512,1,1));
 		fc1.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(fc1);
 		
-		FullConnectionLayer fc2 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),10,1,1));
+		FullConnectionLayer fc2 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),30,1,1));
 		fc2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(fc2);
+		
+		FullConnectionLayer fc3 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),10,1,1));
+		fc3.setActivationFunc(new ReluActivationFunc());
+		network.addLayer(fc3);
 		
 		SoftMaxLayer sflayer = new SoftMaxLayer(network,new BlobParams(network.getBatch(),10,1,1));
 		network.addLayer(sflayer);
@@ -79,12 +89,11 @@ public class MnistNetwork {
 		network.setBatch(100);
 		network.setLoss(new LogLikeHoodLoss());
 		//network.setLoss(new CrossEntropyLoss());
-		optimizer = new SGDOptimizer(1.0);
+		optimizer = new SGDOptimizer(0.2);
 		network.setOptimizer(optimizer);
 		
 		//buildFcNetwork();
 		buildConvNetwork();
-		System.out.println("conv network start learning");
 
 		network.prepare();
 	}
@@ -145,7 +154,7 @@ public class MnistNetwork {
 	}
 	
 	private void testInner(Blob input,Blob label){
-		Blob output = network.test(input);
+		Blob output = network.predict(input);
 		int[] calOutLabels = getBatchOutputLabel(output.getData());
 		int[] realLabels = getBatchOutputLabel(label.getData());
 		assert calOutLabels.length == realLabels.length:"network train---calOutLabels.length == realLabels.length error";
@@ -161,7 +170,9 @@ public class MnistNetwork {
 	
 	
 	public void train(List<DigitImage> imgList,int epoes){
+		System.out.println("begin train");
 		int batch = network.getBatch();
+		double loclaLr = optimizer.getLr();
 		for(int e=0;e<epoes;e++){
 			Collections.shuffle(imgList);
 			for(int i=0;i<imgList.size()-batch;i+=batch){
@@ -169,23 +180,28 @@ public class MnistNetwork {
 				double lossValue = network.train(inputAndLabel.get(0), inputAndLabel.get(1));
 				
 				if(i>batch && i/batch%50==0){
-					System.out.print("lossValue is "+lossValue+"  "+" lr "+optimizer.getLr()+"  ");
+					System.out.print("epoe: "+e+" lossValue: "+lossValue+"  "+" lr: "+optimizer.getLr()+"  ");
 					testInner(inputAndLabel.get(0), inputAndLabel.get(1));
 				}
 			}
-			optimizer.setLr(optimizer.getLr()*0.8);
+			
+			if(loclaLr>0.001){
+				loclaLr*=0.8;
+				optimizer.setLr(loclaLr);
+			}
 		}
 	}
 	
 
 	
 	public void test(List<DigitImage> imgList){
+		System.out.println("begin test");
 		int batch = network.getBatch();
 		int correctCount = 0;
 		int i = 0;
 		for(i=0;i<imgList.size()-batch;i+=batch){
 			List<Blob> inputAndLabel = buildBlobByImageList(imgList,i,batch,1,28,28);
-			Blob output = network.test(inputAndLabel.get(0));
+			Blob output = network.predict(inputAndLabel.get(0));
 			int[] calOutLabels = getBatchOutputLabel(output.getData());
 			int[] realLabels = getBatchOutputLabel(inputAndLabel.get(1).getData());
 			for(int kk=0;kk<calOutLabels.length;kk++){
@@ -197,5 +213,15 @@ public class MnistNetwork {
 		
 		double accuracy = correctCount/(1.0*i+batch);
 		System.out.println("test accuracy is "+accuracy+" correctCount "+correctCount);
+	}
+	
+	public void saveModel(String name){
+		network.saveModel(name);
+	}
+	
+	public void loadModel(String name){
+		network = new Network();
+		network.loadModel(name);
+		network.prepare();
 	}
 }
