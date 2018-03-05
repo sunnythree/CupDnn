@@ -60,18 +60,18 @@ public class MnistNetwork {
 		PoolMaxLayer pool1 = new PoolMaxLayer(network,new BlobParams(network.getBatch(),6,14,14),new BlobParams(1,6,2,2),2,2);
 		network.addLayer(pool1);
 		
-		ConvolutionLayer conv2 = new ConvolutionLayer(network,new BlobParams(network.getBatch(),36,14,14),new BlobParams(1,36,3,3));
+		ConvolutionLayer conv2 = new ConvolutionLayer(network,new BlobParams(network.getBatch(),12,14,14),new BlobParams(1,12,3,3));
 		conv2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(conv2);
 		
-		PoolMeanLayer pool2 = new PoolMeanLayer(network,new BlobParams(network.getBatch(),36,7,7),new BlobParams(1,36,2,2),2,2);
+		PoolMaxLayer pool2 = new PoolMaxLayer(network,new BlobParams(network.getBatch(),12,7,7),new BlobParams(1,12,2,2),2,2);
 		network.addLayer(pool2);
 		
 		FullConnectionLayer fc1 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),512,1,1));
 		fc1.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(fc1);
 		
-		FullConnectionLayer fc2 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),32,1,1));
+		FullConnectionLayer fc2 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),64,1,1));
 		fc2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(fc2);
 		
@@ -89,7 +89,7 @@ public class MnistNetwork {
 		network.setBatch(100);
 		network.setLoss(new LogLikeHoodLoss());
 		//network.setLoss(new CrossEntropyLoss());
-		optimizer = new SGDOptimizer(0.2);
+		optimizer = new SGDOptimizer(0.1);
 		network.setOptimizer(optimizer);
 		
 		//buildFcNetwork();

@@ -1,42 +1,61 @@
 # CupCnn
-CupCnn是个用java写的卷积神经网络
+A Java implement of Convolutional Neural Network. 
 
-## 为什么选择java?<br>
-CupCnn是我在学习卷积神经网络的时候自己尝试写的，写出来后，希望能给那些还在学习卷积神经网络的同学一个参考，
-能让它们少走点弯路吧。java是近年来最流行的编程语言，它有广泛的用户基础，因此，用java来编写卷积升经网络，可以
-帮助到更多的人，尤其是那些看到c++晦涩的语法就退却的人。当然了，卷积神经网络正真要部署到具体的设备上，可能c++
-还是首选，所以，可以通过CupCnn快速学习卷积神经网络，但是也不要忘记学习c++.
 
-## 设计的思路<br>
-我希望它是以足够简单的神经网络，这样有利于初学者学习。所以我没有实现那些并发加速的东西，这保证的代码的简介性。
-设计的时候，我将卷积神经网络分为四个模块：Network（layer blob loss	active），这点可以从包名
-中看出来。layer,loss,active都有一个基类，整个神经网络的编程都是面向基类的。Network是综合
-这四个模块，统筹和调度资源的中心，每个layer都会有一个Network的实例，这样可以轻松的通过Network获得
-各种数据，比如获取每一层的输出，diff等。
+## Build a CNN
+```
+	private void buildConvNetwork(){
+		InputLayer layer1 = new InputLayer(network,new BlobParams(network.getBatch(),1,28,28));
+		network.addLayer(layer1);
+		
+		ConvolutionLayer conv1 = new ConvolutionLayer(network,new BlobParams(network.getBatch(),6,28,28),new BlobParams(1,6,3,3));
+		conv1.setActivationFunc(new ReluActivationFunc());
+		network.addLayer(conv1);
+		
+		PoolMaxLayer pool1 = new PoolMaxLayer(network,new BlobParams(network.getBatch(),6,14,14),new BlobParams(1,6,2,2),2,2);
+		network.addLayer(pool1);
+		
+		ConvolutionLayer conv2 = new ConvolutionLayer(network,new BlobParams(network.getBatch(),12,14,14),new BlobParams(1,12,3,3));
+		conv2.setActivationFunc(new ReluActivationFunc());
+		network.addLayer(conv2);
+		
+		PoolMaxLayer pool2 = new PoolMaxLayer(network,new BlobParams(network.getBatch(),12,7,7),new BlobParams(1,12,2,2),2,2);
+		network.addLayer(pool2);
+		
+		FullConnectionLayer fc1 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),512,1,1));
+		fc1.setActivationFunc(new ReluActivationFunc());
+		network.addLayer(fc1);
+		
+		FullConnectionLayer fc2 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),64,1,1));
+		fc2.setActivationFunc(new ReluActivationFunc());
+		network.addLayer(fc2);
+		
+		FullConnectionLayer fc3 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),10,1,1));
+		fc3.setActivationFunc(new ReluActivationFunc());
+		network.addLayer(fc3);
+		
+		SoftMaxLayer sflayer = new SoftMaxLayer(network,new BlobParams(network.getBatch(),10,1,1));
+		network.addLayer(sflayer);
+		
+	}
+```
 
 	
-## 目前的表现<br>
-目前，在mnist数据集上，全连接神经网络（全连接（100）+全连接（30）+全连接（10）+softmax），训练30
-个epoes,准确率为96.76
-卷积神经网络（卷积（6个特征）+最大值池化+卷积（6个特征）+全连接（512）+全连接（30）+全连接（10）+softmax）
-,在学习速率为0.2的情况下，训练30个epoes,准确率为97.79.我相信经过进一步参数调优，在充分训练的情况下，准确率
-还能提升。
+## Pull Request
+Pull request is welcome.
 
-## 使用<br>
-目前，CupCnn实现了mnist数据集上的测试，在src/test下，MnistTest是main函数的入口，具体的神经网络的
-搭建在MnistNetwork类中。在MnistNetwork类中，buildConvNetwork和buildFcNetwork分别实现
-了搭建卷积神经网络和搭建全连接神经网络。得益于java良好的跨平台属性，你下载完CupCnn的源码后，使用eclipse打
-开该项目，然后直接运行，应该就能开始在mnist数据集上训练和测试了。
+## communicate with
+QQ group：704153141  
 
-## 目前的完成情况及未来的计划<br>
-目前，实现的层有：全连接，卷积，最大值池化层，平均值池化层，softmax层。实现的激活函数有：sigmod,tanh,relu.
-实现的损失函数有：交叉熵，对数似然。实现的优化为：SGD。参数已经能save和load.接下来会添加droupout层，还会尝试
-添加cifar-10上的例子。
+## Features
+1.without any dependency
+2.Basic layer: input layer, convolution layer, pooling layer, full connect layer, softmax layer
+3.Loss function: Cross Entropy,log like-hood
+4.Optimize method: SGD
+5.active funcs:sigmod , tanh, relu
 
-
-## 交流
-CupCnn QQ交流群：704153141  
-有问题还可以直接发到我的邮箱：1318288270@qq.com
+##License
+BSD 2-Clause
 	
 			
 
