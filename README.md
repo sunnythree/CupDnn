@@ -2,8 +2,23 @@
 A Java implement of Convolutional Neural Network. 
 
 
-## Build a CNN
+## Build a CNN Network
 ```
+	public void buildNetwork(){
+		//首先构建神经网络对象，并设置参数
+		network = new Network();
+		network.setBatch(100);
+		network.setLoss(new LogLikeHoodLoss());
+		//network.setLoss(new CrossEntropyLoss());
+		optimizer = new SGDOptimizer(0.1);
+		network.setOptimizer(optimizer);
+		
+		//buildFcNetwork();
+		buildConvNetwork();
+
+		network.prepare();
+	}
+	
 	private void buildConvNetwork(){
 		InputLayer layer1 = new InputLayer(network,new BlobParams(network.getBatch(),1,28,28));
 		network.addLayer(layer1);
@@ -45,14 +60,17 @@ A Java implement of Convolutional Neural Network.
 Pull request is welcome.
 
 ## communicate with
-QQ group：704153141  
+QQ group: 704153141  
 
 ## Features
-1.without any dependency
-2.Basic layer: input layer, convolution layer, pooling layer, full connect layer, softmax layer
-3.Loss function: Cross Entropy,log like-hood
-4.Optimize method: SGD
-5.active funcs:sigmod , tanh, relu
+1.without any dependency<br />
+2.Basic layer: input layer, convolution layer, pooling layer, full connect layer, softmax layer<br />
+3.Loss function: Cross Entropy,log like-hood<br />
+4.Optimize method: SGD<br />
+5.active funcs:sigmod , tanh, relu<br />
+
+## Test
+mnist test is offered.
 
 ##License
 BSD 2-Clause
