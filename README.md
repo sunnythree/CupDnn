@@ -5,7 +5,7 @@ A Java implement of Convolutional Neural Network.
 ## Build a CNN Network
 ```
 	public void buildNetwork(){
-		//首先构建神经网络对象，并设置参数
+		//cteate network and set parameter
 		network = new Network();
 		network.setBatch(100);
 		network.setLoss(new LogLikeHoodLoss());
