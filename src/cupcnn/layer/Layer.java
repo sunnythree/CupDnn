@@ -16,7 +16,11 @@ public abstract class Layer{
 	protected Network mNetwork;
 	protected ActivationFunc activationFunc;
 	protected BlobParams layerParams;
-	
+	//BlobParams中的四个参数说明
+	//第一个：batch,就是一个批次中有多少个图片
+	//第二个：channel,一张图片有多少个通道
+	//第三个：图片的高
+	//第四个：图片的宽
 	public Layer(Network network,BlobParams parames){
 		this.mNetwork = network;
 		this.layerParams = parames;

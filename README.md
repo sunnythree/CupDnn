@@ -72,6 +72,9 @@ QQ group: 704153141
 ## Test
 mnist test is offered.
 
+## Performance
+The accuracy rate is about 98% in mnist dateset with cnn.
+
 ##License
 BSD 2-Clause
 	
