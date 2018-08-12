@@ -210,8 +210,8 @@ public class MnistNetwork {
 				}
 			}
 		}
-		
-		double accuracy = correctCount/(1.0*i+batch);
+
+		double accuracy = correctCount / (i + 1 - batch);
 		System.out.println("test accuracy is "+accuracy+" correctCount "+correctCount);
 	}
 	
