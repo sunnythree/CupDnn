@@ -39,7 +39,7 @@ public class ConvolutionLayer extends Layer{
 	public void prepare() {
 		// TODO Auto-generated method stub
 		Blob output = mNetwork.getDatas().get(id);
-		//layerParams.getHeight()ï¿½ï¿½Ê¾ï¿½Ã²ï¿½ï¿½ï¿½Òªï¿½ï¿½È¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+		//layerParams.getHeight()±íÊ¾¸Ã²ãÐèÒªÌáÈ¡µÄÌØÕ÷ÊýÁ¿
 		if(kernel ==null && bias == null){
 			kernel = new Blob(kernelParams.getNumbers(),kernelParams.getChannels(),kernelParams.getHeight(),kernelParams.getWidth());
 			bias = new Blob(kernelParams.getNumbers(),kernelParams.getChannels(),1,1);
@@ -61,10 +61,10 @@ public class ConvolutionLayer extends Layer{
 		Blob output = mNetwork.getDatas().get(id);
 		double [] outputData = output.getData();
 		double [] zData = z.getData();
-		//ï¿½ï¿½ï¿½ï¿½ï¿½Ä½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½zï¿½ï¿½
+		//¾í»ýºóµÄ½á¹û´æÖüÔÚzÖÐ
 		z.fillValue(0);
 		MathFunctions.convolutionBlobSame(input, kernel, bias, z);
-		//ï¿½ï¿½ï¿½îº¯ï¿½ï¿½
+		//¼¤»îº¯Êý
 		if(activationFunc!=null){
 			for(int n=0;n<output.getNumbers();n++){
 				for(int c=0;c<output.getChannels();c++){
@@ -90,7 +90,7 @@ public class ConvolutionLayer extends Layer{
 		double[] inputData = input.getData();
 		double[] biasGradientData = biasGradient.getData();
 		
-		//ï¿½È³Ë¼ï¿½ï¿½îº¯ï¿½ï¿½ï¿½Äµï¿½ï¿½ï¿½,ï¿½Ãµï¿½ï¿½Ã²ï¿½ï¿½ï¿½ï¿½ï¿½
+		//ÏÈ³Ë¼¤»îº¯ÊýµÄµ¼Êý,µÃµ½¸Ã²ãµÄÎó²î
 		if(activationFunc!=null){
 			for(int n=0;n<inputDiff.getNumbers();n++){
 				for(int c=0;c<inputDiff.getChannels();c++){
@@ -103,20 +103,20 @@ public class ConvolutionLayer extends Layer{
 			}
 		}
 		
-		//È»ï¿½ï¿½ï¿½ï¿½Â²ï¿½ï¿½ï¿½
-		//ï¿½ï¿½ï¿½ï¿½kernelGradient,ï¿½ï¿½ï¿½ï²¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½kernel,kernelï¿½ï¿½ï¿½Å»ï¿½ï¿½ï¿½ï¿½Ð¸ï¿½ï¿½ï¿½
+		//È»ºó¸üÐÂ²ÎÊý
+		//¼ÆËãkernelGradient,ÕâÀï²¢²»¸üÐÂkernel,kernelÔÚÓÅ»¯Æ÷ÖÐ¸üÐÂ
 		kernelGradient.fillValue(0);
 		for(int n=0;n<inputDiff.getNumbers();n++){
 			for(int c=0;c<inputDiff.getChannels();c++){
 				int inputChannelIndex = c/(inputDiff.getChannels()/input.getChannels());
 				for(int h=0;h<inputDiff.getHeight();h++){
 					for(int w=0;w<inputDiff.getWidth();w++){
-						//ï¿½È¶ï¿½Î»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
-						//È»ï¿½ï¿½ï¿½ï¿½ï¿½kernel,Í¨ï¿½ï¿½kernelï¿½ï¿½Î»ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
-						//È»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½diff
+						//ÏÈ¶¨Î»µ½Êä³öµÄÎ»ÖÃ
+						//È»ºó±éÀúkernel,Í¨¹ýkernel¶¨Î»ÊäÈëµÄÎ»ÖÃ
+						//È»ºó½«ÊäÈë³ËÒÔdiff
 						int inStartX = w - kernelGradient.getWidth()/2;
 						int inStartY = h - kernelGradient.getHeight()/2;
-						//ï¿½Í¾ï¿½ï¿½ï¿½Ë³Ë¼ï¿½
+						//ºÍ¾í»ýºË³Ë¼Ó
 			
 						for(int kh=0;kh<kernelGradient.getHeight();kh++){
 							for(int kw=0;kw<kernelGradient.getWidth();kw++){
@@ -132,10 +132,10 @@ public class ConvolutionLayer extends Layer{
 				}
 			}
 		}
-		//Æ½ï¿½ï¿½
+		//Æ½¾ù
 		MathFunctions.dataDivConstant(kernelGradientData, inputDiff.getNumbers());
 		
-		//ï¿½ï¿½ï¿½ï¿½bias
+		//¸üÐÂbias
 		biasGradient.fillValue(0);
 		for(int n=0;n<inputDiff.getNumbers();n++){
 			for(int c=0;c<inputDiff.getChannels();c++){
@@ -146,13 +146,13 @@ public class ConvolutionLayer extends Layer{
 				}
 			}
 		}
-		//Æ½ï¿½ï¿½
+		//Æ½¾ù
 		MathFunctions.dataDivConstant(biasGradientData, inputDiff.getNumbers());
 		
 		if(id<=1)return;
-		//ï¿½È°ï¿½kernelï¿½ï¿½×ª180ï¿½ï¿½
+		//ÏÈ°ÑkernelÐý×ª180¶È
 		//Blob kernelRoate180 = MathFunctions.rotate180Blob(kernel);
-		//È»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+		//È»ºóÔÙ×ö¾í»ý
 		outputDiff.fillValue(0);
 		MathFunctions.convolutionBlobSame(inputDiff, kernel, outputDiff);	
 		
@@ -170,7 +170,7 @@ public class ConvolutionLayer extends Layer{
 		// TODO Auto-generated method stub
 		try {
 			out.writeUTF(getType());
-			//ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½batchÒ²ï¿½ï¿½ï¿½ï¿½layerParamsï¿½ï¿½numberï¿½ï¿½ï¿½ï¿½1ï¿½ï¿½ï¿½ï¿½Îªpredictï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½Ê¹ï¿½Ãµï¿½Ê±ï¿½ï¿½ï¿½ï¿½ï¿½batchÒ»ï¿½ã¶¼ï¿½ï¿½1
+			//±£´æµÄÊ±ºò£¬batchÒ²¾ÍÊÇlayerParamsµÄnumber×ÜÊÇ1£¬ÒòÎªpredictµÄÊ±ºò£¬ÒòÎªÕæÕýÊ¹ÓÃµÄÊ±ºò£¬Õâ¸öbatchÒ»°ã¶¼ÊÇ1
 			layerParams.setNumbers(1);
 			out.writeObject(layerParams);
 			out.writeObject(kernelParams);
