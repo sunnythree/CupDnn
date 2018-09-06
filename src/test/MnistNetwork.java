@@ -67,7 +67,7 @@ public class MnistNetwork {
 		PoolMaxLayer pool2 = new PoolMaxLayer(network,new BlobParams(network.getBatch(),12,7,7),new BlobParams(1,12,2,2),2,2);
 		network.addLayer(pool2);
 		
-		FullConnectionLayer fc1 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),512,1,1));
+		FullConnectionLayer fc1 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),256,1,1));
 		fc1.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(fc1);
 		
@@ -211,7 +211,7 @@ public class MnistNetwork {
 			}
 		}
 		
-		double accuracy = correctCount/(i+1-batch);
+		double accuracy = correctCount/(i*1.0+1-batch);
 		System.out.println("test accuracy is "+accuracy+" correctCount "+correctCount);
 	}
 	
