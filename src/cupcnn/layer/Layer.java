@@ -24,8 +24,10 @@ public abstract class Layer{
 	public Layer(Network network,BlobParams parames){
 		this.mNetwork = network;
 		this.layerParams = parames;
-		paramsList = new ArrayList<Blob>();
-		gradientList = new ArrayList<Blob>();
+		paramsListW = new ArrayList<Blob>();
+		gradientListW = new ArrayList<Blob>();
+		paramsListB = new ArrayList<Blob>();
+		gradientListB = new ArrayList<Blob>();
 	}
 	
 	public BlobParams getLayerParames(){
@@ -41,14 +43,20 @@ public abstract class Layer{
 	public void setActivationFunc(ActivationFunc func){
 		this.activationFunc = func;
 	}
-	public List<Blob> getParamsList(){
-		return paramsList;
+	public List<Blob> getParamsWList(){
+		return paramsListW;
 	}
 	
-	public List<Blob> getGradientList(){
-		return gradientList;
+	public List<Blob> getGradientWList(){
+		return gradientListW;
+	}
+	public List<Blob> getParamsBList(){
+		return paramsListB;
 	}
 	
+	public List<Blob> getGradientBList(){
+		return gradientListB;
+	}	
 	//类型
 	abstract public String getType();
 
@@ -64,6 +72,8 @@ public abstract class Layer{
 	abstract public void loadModel(ObjectInputStream in);
 	
 	//用来更新参数
-	protected List<Blob> paramsList;
-	protected List<Blob> gradientList;
+	protected List<Blob> paramsListW;
+	protected List<Blob> gradientListW;
+	protected List<Blob> paramsListB;
+	protected List<Blob> gradientListB;
 }

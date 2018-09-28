@@ -24,6 +24,7 @@ import cupcnn.layer.PoolMeanLayer;
 import cupcnn.layer.SoftMaxLayer;
 import cupcnn.loss.CrossEntropyLoss;
 import cupcnn.loss.LogLikeHoodLoss;
+import cupcnn.optimizer.Optimizer;
 import cupcnn.optimizer.SGDOptimizer;
 
 public class MnistNetwork {
@@ -83,13 +84,13 @@ public class MnistNetwork {
 		network.addLayer(sflayer);
 		
 	}
-	public void buildNetwork(){
+	public void buildNetwork(int numOfTrainData){
 		//首先构建神经网络对象，并设置参数
 		network = new Network();
 		network.setBatch(100);
 		network.setLoss(new LogLikeHoodLoss());
 		//network.setLoss(new CrossEntropyLoss());
-		optimizer = new SGDOptimizer(0.1);
+		optimizer = new SGDOptimizer(0.1,5.0,Optimizer.GMode.L2,numOfTrainData);
 		network.setOptimizer(optimizer);
 		
 		//buildFcNetwork();
@@ -109,7 +110,7 @@ public class MnistNetwork {
 			byte[] imgData = img.imageData;
 			assert img.imageData.length== input.get3DSize():"buildBlobByImageList -- blob size error";
 			for(int j=0;j<imgData.length;j++){
-				blobData[(i-start)*input.get3DSize()+j] = (imgData[j]&0xff)/256.0;
+				blobData[(i-start)*input.get3DSize()+j] = (imgData[j]&0xff)/256.0;//normalize and centerlize
 			}
 			int labelValue = img.label;
 			for(int j=0;j<label.get3DSize();j++){

@@ -111,7 +111,8 @@ public class Network{
 		for(int i=layers.size()-1;i>-1;i--){
 			layers.get(i).backward();
 			//使用优化器更新参数
-			optimizer.update(layers.get(i).getParamsList(), layers.get(i).getGradientList());
+			optimizer.updateW(layers.get(i).getParamsWList(), layers.get(i).getGradientWList());
+			optimizer.updateB(layers.get(i).getParamsBList(), layers.get(i).getGradientBList());
 		}
 	}
 	

@@ -156,13 +156,15 @@ public class ConvolutionLayer extends Layer{
 		outputDiff.fillValue(0);
 		MathFunctions.convolutionBlobSame(inputDiff, kernel, outputDiff);	
 		
-		paramsList.clear();
-		paramsList.add(kernel);
-		paramsList.add(bias);
+		paramsListW.clear();
+		paramsListW.add(kernel);
+		paramsListB.clear();
+		paramsListB.add(bias);
 		
-		gradientList.clear();
-		gradientList.add(kernelGradient);
-		gradientList.add(biasGradient);
+		gradientListW.clear();
+		gradientListW.add(kernelGradient);
+		gradientListB.clear();
+		gradientListB.add(biasGradient);
 	}
 
 	@Override

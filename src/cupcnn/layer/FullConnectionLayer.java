@@ -145,13 +145,15 @@ public class FullConnectionLayer extends Layer{
 			}
 		}	
 		
-		paramsList.clear();
-		paramsList.add(w);
-		paramsList.add(b);
+		paramsListW.clear();
+		paramsListW.add(w);
+		paramsListB.clear();
+		paramsListB.add(b);
 		
-		gradientList.clear();
-		gradientList.add(wGradient);
-		gradientList.add(bGradient);
+		gradientListW.clear();
+		gradientListW.add(wGradient);
+		gradientListB.clear();
+		gradientListB.add(bGradient);
 
 	}
 
