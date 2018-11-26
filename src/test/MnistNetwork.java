@@ -61,11 +61,11 @@ public class MnistNetwork {
 		PoolMaxLayer pool1 = new PoolMaxLayer(network,new BlobParams(network.getBatch(),6,14,14),new BlobParams(1,6,2,2),2,2);
 		network.addLayer(pool1);
 		
-		ConvolutionLayer conv2 = new ConvolutionLayer(network,new BlobParams(network.getBatch(),12,14,14),new BlobParams(1,12,3,3));
+		ConvolutionLayer conv2 = new ConvolutionLayer(network,new BlobParams(network.getBatch(),24,14,14),new BlobParams(1,24,3,3));
 		conv2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(conv2);
 		
-		PoolMaxLayer pool2 = new PoolMaxLayer(network,new BlobParams(network.getBatch(),12,7,7),new BlobParams(1,12,2,2),2,2);
+		PoolMaxLayer pool2 = new PoolMaxLayer(network,new BlobParams(network.getBatch(),24,7,7),new BlobParams(1,24,2,2),2,2);
 		network.addLayer(pool2);
 		
 		FullConnectionLayer fc1 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),256,1,1));
@@ -110,7 +110,7 @@ public class MnistNetwork {
 			byte[] imgData = img.imageData;
 			assert img.imageData.length== input.get3DSize():"buildBlobByImageList -- blob size error";
 			for(int j=0;j<imgData.length;j++){
-				blobData[(i-start)*input.get3DSize()+j] = (imgData[j]&0xff)/256.0;//normalize and centerlize
+				blobData[(i-start)*input.get3DSize()+j] = (imgData[j]&0xff)/128.0-1;//normalize and centerlize(-1,1)
 			}
 			int labelValue = img.label;
 			for(int j=0;j<label.get3DSize();j++){
