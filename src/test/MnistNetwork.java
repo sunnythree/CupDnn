@@ -54,28 +54,30 @@ public class MnistNetwork {
 		InputLayer layer1 = new InputLayer(network,new BlobParams(network.getBatch(),1,28,28));
 		network.addLayer(layer1);
 		
-		ConvolutionLayer conv1 = new ConvolutionLayer(network,new BlobParams(network.getBatch(),6,28,28),new BlobParams(1,6,3,3));
+		ConvolutionLayer conv1 = new ConvolutionLayer(network,new BlobParams(network.getBatch(),6,28,28),new BlobParams(1,6,4,4));
 		conv1.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(conv1);
 		
 		PoolMaxLayer pool1 = new PoolMaxLayer(network,new BlobParams(network.getBatch(),6,14,14),new BlobParams(1,6,2,2),2,2);
 		network.addLayer(pool1);
 		
-		ConvolutionLayer conv2 = new ConvolutionLayer(network,new BlobParams(network.getBatch(),24,14,14),new BlobParams(1,24,3,3));
+		ConvolutionLayer conv2 = new ConvolutionLayer(network,new BlobParams(network.getBatch(),36,14,14),new BlobParams(1,36,3,3));
 		conv2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(conv2);
 		
-		PoolMaxLayer pool2 = new PoolMaxLayer(network,new BlobParams(network.getBatch(),24,7,7),new BlobParams(1,24,2,2),2,2);
+		PoolMeanLayer pool2 = new PoolMeanLayer(network,new BlobParams(network.getBatch(),36,7,7),new BlobParams(1,36,2,2),2,2);
 		network.addLayer(pool2);
+		
 		
 		FullConnectionLayer fc1 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),256,1,1));
 		fc1.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(fc1);
 		
+
 		FullConnectionLayer fc2 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),64,1,1));
 		fc2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(fc2);
-		
+
 		FullConnectionLayer fc3 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),10,1,1));
 		fc3.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(fc3);

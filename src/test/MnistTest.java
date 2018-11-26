@@ -13,8 +13,8 @@ public class MnistTest {
 		// TODO Auto-generated method stub
 		
 		//load mnist
-		ReadFile rf1=new ReadFile("data\\train-labels.idx1-ubyte","data\\train-images.idx3-ubyte");
-		ReadFile rf2=new ReadFile("data\\t10k-labels.idx1-ubyte","data\\t10k-images.idx3-ubyte");
+		ReadFile rf1=new ReadFile("data/train-labels.idx1-ubyte","data/train-images.idx3-ubyte");
+		ReadFile rf2=new ReadFile("data/t10k-labels.idx1-ubyte","data/t10k-images.idx3-ubyte");
 		try {
 			tests = rf2.loadDigitImages();
 			trains =rf1.loadDigitImages();
@@ -25,7 +25,7 @@ public class MnistTest {
 		
 		MnistNetwork mn = new MnistNetwork();
 		mn.buildNetwork(trains.size());
-		mn.train(trains,20);
+		mn.train(trains,10);
 		//mn.test(tests);
 		mn.saveModel("model/mnist.model");
 		
