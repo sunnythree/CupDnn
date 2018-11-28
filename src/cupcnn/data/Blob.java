@@ -17,6 +17,23 @@ public class Blob implements Serializable{
 	private int height;
 	private int id;
 	
+	public Blob(Blob b,boolean copy) {
+		this.numbers = b.numbers;
+		this.channels = b.channels;
+		this.height = b.height;
+		this.width = b.width;
+		data = new double[getSize()];	
+		if(copy) {
+			for(int i=0;i<data.length;i++) {
+				data[i]=b.getData()[i];
+			}
+		}else {
+			for(int i=0;i<data.length;i++) {
+				data[i]=0;
+			}
+		}
+	}
+	
 	public Blob(int numbers,int channels,int height,int width){
 		this.numbers = numbers;
 		this.channels = channels;

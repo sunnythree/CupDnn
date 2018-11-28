@@ -4,7 +4,17 @@ import java.util.List;
 
 import cupcnn.data.Blob;
 
+
+/*
+ * SGD without momentum
+ */
+
 public class SGDOptimizer extends Optimizer {
+	
+	public SGDOptimizer(double lr){
+		super(lr);
+	}
+
 	
 	public SGDOptimizer(double lr,double lamda,Optimizer.GMode mode,int numOfTrainData){
 		super(lr,lamda,mode,numOfTrainData);

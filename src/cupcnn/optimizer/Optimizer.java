@@ -13,6 +13,12 @@ public abstract class Optimizer {
 		L2
 	}
 	GMode mode;
+	public Optimizer(double lr){
+		this.lr = lr;
+		this.mode = GMode.NONE;
+	}
+
+	
 	public Optimizer(double lr,double lamda,GMode mode,int numOfTrainData){
 		this.lr = lr;
 		this.lamda = lamda;

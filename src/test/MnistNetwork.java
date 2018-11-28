@@ -25,11 +25,12 @@ import cupcnn.layer.SoftMaxLayer;
 import cupcnn.loss.CrossEntropyLoss;
 import cupcnn.loss.LogLikeHoodLoss;
 import cupcnn.optimizer.Optimizer;
+import cupcnn.optimizer.SGDMOptimizer;
 import cupcnn.optimizer.SGDOptimizer;
 
 public class MnistNetwork {
 	Network network;
-	SGDOptimizer optimizer;
+	SGDMOptimizer optimizer;
 	private void buildFcNetwork(){
 		//¸ønetworkÌí¼ÓÍøÂç²ã
 		InputLayer layer1 = new InputLayer(network,new BlobParams(network.getBatch(),1,28,28));
@@ -69,7 +70,7 @@ public class MnistNetwork {
 		network.addLayer(pool2);
 		
 		
-		FullConnectionLayer fc1 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),256,1,1));
+		FullConnectionLayer fc1 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),512,1,1));
 		fc1.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(fc1);
 		
@@ -92,7 +93,7 @@ public class MnistNetwork {
 		network.setBatch(100);
 		network.setLoss(new LogLikeHoodLoss());
 		//network.setLoss(new CrossEntropyLoss());
-		optimizer = new SGDOptimizer(0.1,5.0,Optimizer.GMode.L2,numOfTrainData);
+		optimizer = new SGDMOptimizer(0.1,5.0,Optimizer.GMode.L2,numOfTrainData,0.5);
 		network.setOptimizer(optimizer);
 		
 		//buildFcNetwork();
@@ -189,7 +190,7 @@ public class MnistNetwork {
 			}
 			
 			if(loclaLr>0.001){
-				loclaLr*=0.8;
+				loclaLr*=0.7;
 				optimizer.setLr(loclaLr);
 			}
 		}
