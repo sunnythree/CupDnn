@@ -30,7 +30,7 @@ import cupcnn.optimizer.SGDOptimizer;
 
 public class Cifar10Network {
 	Network network;
-	SGDMOptimizer optimizer;
+	SGDOptimizer optimizer;
 	private void buildFcNetwork(){
 		//给network添加网络层
 		InputLayer layer1 = new InputLayer(network,new BlobParams(network.getBatch(),3,32,32));
@@ -62,13 +62,12 @@ public class Cifar10Network {
 		PoolMaxLayer pool1 = new PoolMaxLayer(network,new BlobParams(network.getBatch(),12,16,16),new BlobParams(1,12,2,2),2,2);
 		network.addLayer(pool1);
 		
-		ConvolutionLayer conv2 = new ConvolutionLayer(network,new BlobParams(network.getBatch(),36,16,16),new BlobParams(1,36,3,3));
+		ConvolutionLayer conv2 = new ConvolutionLayer(network,new BlobParams(network.getBatch(),48,16,16),new BlobParams(1,48,3,3));
 		conv2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(conv2);
 		
-		PoolMeanLayer pool2 = new PoolMeanLayer(network,new BlobParams(network.getBatch(),36,8,8),new BlobParams(1,36,2,2),2,2);
+		PoolMeanLayer pool2 = new PoolMeanLayer(network,new BlobParams(network.getBatch(),48,8,8),new BlobParams(1,48,2,2),2,2);
 		network.addLayer(pool2);
-		
 		
 		FullConnectionLayer fc1 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),512,1,1));
 		fc1.setActivationFunc(new ReluActivationFunc());
@@ -90,10 +89,10 @@ public class Cifar10Network {
 	public void buildNetwork(int numOfTrainData){
 		//首先构建神经网络对象，并设置参数
 		network = new Network();
-		network.setBatch(20);
+		network.setBatch(30);
 		network.setLoss(new LogLikeHoodLoss());
 		//network.setLoss(new CrossEntropyLoss());
-		optimizer = new SGDMOptimizer(0.01,5.0,Optimizer.GMode.L2,numOfTrainData,0.5);
+		optimizer = new SGDOptimizer(0.1,3.0,Optimizer.GMode.L2,numOfTrainData);
 		network.setOptimizer(optimizer);
 		
 		//buildFcNetwork();

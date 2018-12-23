@@ -27,7 +27,7 @@ import test.cifar10.ReadFile;
 		
 		Cifar10Network mn = new Cifar10Network();
 		mn.buildNetwork(trains.size());
-		mn.train(trains,10);
+		mn.train(trains,5);
 		//mn.test(tests);
 		mn.saveModel("model/cifar10.model");
 		

@@ -71,7 +71,8 @@ QQ group: 704153141
 6.L1 and L2 regularization is supported.<br />
 
 ## Test
-mnist test is offered.
+mnist test is offered(2017).
+cifar10 test is offered(2018-12-23).
 
 ## Performance
 The accuracy rate is about 99% in mnist dateset with cnn.
