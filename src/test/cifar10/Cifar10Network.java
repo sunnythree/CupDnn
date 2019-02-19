@@ -179,11 +179,15 @@ public class Cifar10Network {
 		for(int e=0;e<epoes;e++){
 			System.out.println("training...... epoe: "+e+" lossValue: "+lossValue+"  "+" lr: "+optimizer.getLr()+"  ");
 			Collections.shuffle(trainLists);
-			for(int i=0;i<trainLists.size()-batch;i+=batch){
+			for(int i=0;i<=trainLists.size()-batch;i+=batch){
 				List<Blob> inputAndLabel = buildBlobByImageList(trainLists,i,batch,3,32,32);
 				lossValue = network.train(inputAndLabel.get(0), inputAndLabel.get(1));
+				if(i%2000==0) {
+					System.out.print(".");
+				}
 			}
 			//每个epoe做一次测试
+			System.out.println();
 			test(testLists);
 			
 			if(loclaLr>0.001){

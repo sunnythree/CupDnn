@@ -63,11 +63,11 @@ public class MnistNetwork {
 		PoolMaxLayer pool1 = new PoolMaxLayer(network,new BlobParams(network.getBatch(),6,14,14),new BlobParams(1,6,2,2),2,2);
 		network.addLayer(pool1);
 		
-		Conv2dLayer conv2 = new Conv2dLayer(network,new BlobParams(network.getBatch(),10,14,14),new BlobParams(1,10,3,3));
+		Conv2dLayer conv2 = new Conv2dLayer(network,new BlobParams(network.getBatch(),6,14,14),new BlobParams(1,6,3,3));
 		conv2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(conv2);
 		
-		PoolMeanLayer pool2 = new PoolMeanLayer(network,new BlobParams(network.getBatch(),10,7,7),new BlobParams(1,10,2,2),2,2);
+		PoolMeanLayer pool2 = new PoolMeanLayer(network,new BlobParams(network.getBatch(),6,7,7),new BlobParams(1,6,2,2),2,2);
 		network.addLayer(pool2);
 		
 		
@@ -181,11 +181,15 @@ public class MnistNetwork {
 		for(int e=0;e<epoes;e++){
 			System.out.println("training...... epoe: "+e+" lossValue: "+lossValue+"  "+" lr: "+optimizer.getLr()+"  ");
 			Collections.shuffle(trainLists);
-			for(int i=0;i<trainLists.size()-batch;i+=batch){
+			for(int i=0;i<=trainLists.size()-batch;i+=batch){
 				List<Blob> inputAndLabel = buildBlobByImageList(trainLists,i,batch,1,28,28);
 				lossValue = network.train(inputAndLabel.get(0), inputAndLabel.get(1));
+				if(i%1000==0) {
+					System.out.print(".");
+				}
 			}
 			//每个epoe做一次测试
+			System.out.println();
 			test(testLists);
 			
 			if(loclaLr>0.001){
