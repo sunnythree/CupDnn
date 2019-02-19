@@ -64,11 +64,12 @@ QQ group: 704153141
 
 ## Features
 1.without any dependency<br />
-2.Basic layer: input layer, convolution layer, pooling layer(MAX and MEAN), full connect layer, softmax layer<br />
+2.Basic layer: input layer, conv2d layer,deepwise conv2d layer, pooling layer(MAX and MEAN), full connect layer, softmax layer<br />
 3.Loss function: Cross Entropy,log like-hood<br />
 4.Optimize method: SGD(SGD without momentum),SGDM(SGD with momentum)<br />
 5.active funcs:sigmod , tanh, relu<br />
 6.L1 and L2 regularization is supported.<br />
+7.Support for multi-threaded acceleration<br />
 
 ## Test
 mnist test is offered(2017).<br />
