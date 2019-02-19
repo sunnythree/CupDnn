@@ -33,55 +33,55 @@ public class Cifar10Network {
 	SGDOptimizer optimizer;
 	private void buildFcNetwork(){
 		//¸ønetworkÌí¼ÓÍøÂç²ã
-		InputLayer layer1 = new InputLayer(network,new BlobParams(network.getBatch(),3,32,32));
+		InputLayer layer1 = new InputLayer(network,32,32,3);
 		network.addLayer(layer1);
-		FullConnectionLayer layer2 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),3072,1,1));
+		FullConnectionLayer layer2 = new FullConnectionLayer(network,3072);
 		layer2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(layer2);
-		FullConnectionLayer layer3 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),800,1,1));
+		FullConnectionLayer layer3 = new FullConnectionLayer(network,800);
 		layer3.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(layer3);
-		FullConnectionLayer layer4 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),100,1,1));
+		FullConnectionLayer layer4 = new FullConnectionLayer(network,100);
 		layer4.setActivationFunc(new SigmodActivationFunc());
 		network.addLayer(layer4);
-		FullConnectionLayer layer5 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),10,1,1));
+		FullConnectionLayer layer5 = new FullConnectionLayer(network,10);
 		layer5.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(layer5);
-		SoftMaxLayer sflayer = new SoftMaxLayer(network,new BlobParams(network.getBatch(),10,1,1));
+		SoftMaxLayer sflayer = new SoftMaxLayer(network,10);
 		network.addLayer(sflayer);
 	}
 	
 	private void buildConvNetwork(){
-		InputLayer layer1 = new InputLayer(network,new BlobParams(network.getBatch(),3,32,32));
+		InputLayer layer1 = new InputLayer(network,32,32,3);
 		network.addLayer(layer1);
 		
-		Conv2dLayer conv1 = new Conv2dLayer(network,new BlobParams(network.getBatch(),6,32,32),new BlobParams(1,6,5,5));
+		Conv2dLayer conv1 = new Conv2dLayer(network,32,32,3,6,5,1);
 		conv1.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(conv1);
 		
-		PoolMaxLayer pool1 = new PoolMaxLayer(network,new BlobParams(network.getBatch(),6,16,16),new BlobParams(1,6,2,2),2,2);
+		PoolMaxLayer pool1 = new PoolMaxLayer(network,32,32,6,2,2);
 		network.addLayer(pool1);
 		
-		Conv2dLayer conv2 = new Conv2dLayer(network,new BlobParams(network.getBatch(),24,16,16),new BlobParams(1,24,3,3));
+		Conv2dLayer conv2 = new Conv2dLayer(network,16,16,6,24,3,1);
 		conv2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(conv2);
 		
-		PoolMeanLayer pool2 = new PoolMeanLayer(network,new BlobParams(network.getBatch(),24,8,8),new BlobParams(1,24,2,2),2,2);
+		PoolMeanLayer pool2 = new PoolMeanLayer(network,16,16,24,2,2);
 		network.addLayer(pool2);
 		
-		FullConnectionLayer fc1 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),512,1,1));
+		FullConnectionLayer fc1 = new FullConnectionLayer(network,512);
 		fc1.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(fc1);
 		
-		FullConnectionLayer fc2 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),64,1,1));
+		FullConnectionLayer fc2 = new FullConnectionLayer(network,64);
 		fc2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(fc2);
 
-		FullConnectionLayer fc3 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),10,1,1));
+		FullConnectionLayer fc3 = new FullConnectionLayer(network,10);
 		fc3.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(fc3);
 		
-		SoftMaxLayer sflayer = new SoftMaxLayer(network,new BlobParams(network.getBatch(),10,1,1));
+		SoftMaxLayer sflayer = new SoftMaxLayer(network,10);
 		network.addLayer(sflayer);
 		
 	}

@@ -13,16 +13,27 @@ import cupcnn.util.ThreadPoolManager;
 
 public class PoolMeanLayer extends Layer{
 	public static final String TYPE = "PoolMeanLayer";
-	private BlobParams kernelParams;
-	private int kernelHeightStride = 0;
-	private int kernelWidthStride = 0;
+	private Network mNetwork;
+	private int width;
+	private int height;
+	private int inChannel;
+	private int kernelSize;
+	private int stride;
 	
-	public PoolMeanLayer(Network network, BlobParams parames,BlobParams kernelParams,int kernelHeightStride,int kernelWidthStride) {
-		super(network, parames);
+	public PoolMeanLayer(Network network) {
+		super(network);
+		mNetwork = network;
+	}
+	
+	public PoolMeanLayer(Network network,int width,int height,int inChannel,int kernelSize,int stride) {
+		super(network);
 		// TODO Auto-generated constructor stub
-		this.kernelParams = kernelParams;
-		this.kernelHeightStride = kernelHeightStride;
-		this.kernelWidthStride = kernelWidthStride;
+		this.mNetwork = network;
+		this.width = width;
+		this.height = height;
+		this.inChannel = inChannel;
+		this.kernelSize = kernelSize;
+		this.stride = stride;
 	}
 
 	@Override
@@ -52,16 +63,16 @@ public class PoolMeanLayer extends Layer{
 					for(int c=0;c<output.getChannels();c++){
 						for(int h=0;h<output.getHeight();h++){
 							for(int w=0;w<output.getWidth();w++){
-								int inStartX = w*kernelWidthStride;
-								int inStartY = h*kernelHeightStride;
+								int inStartX = w*stride;
+								int inStartY = h*stride;
 								double sum = 0;
-								for(int kh=0;kh<kernelParams.getHeight();kh++){
-									for(int kw=0;kw<kernelParams.getWidth();kw++){
+								for(int kh=0;kh<kernelSize;kh++){
+									for(int kw=0;kw<kernelSize;kw++){
 										int curIndex = input.getIndexByParams(n, c, inStartY+kh, inStartX+kw);
 										sum += inputData[curIndex];
 									}
 								}
-								outputData[output.getIndexByParams(n, c, h, w)] = sum/(kernelParams.getHeight()*kernelParams.getWidth());
+								outputData[output.getIndexByParams(n, c, h, w)] = sum/(kernelSize*kernelSize);
 							}
 						}
 					}
@@ -87,10 +98,10 @@ public class PoolMeanLayer extends Layer{
 					for(int c=0;c<inputDiff.getChannels();c++){
 						for(int h=0;h<inputDiff.getHeight();h++){
 							for(int w=0;w<inputDiff.getWidth();w++){
-								int inStartX = w*kernelWidthStride;
-								int inStartY = h*kernelHeightStride;
-								for(int kh=0;kh<kernelParams.getHeight();kh++){
-									for(int kw=0;kw<kernelParams.getWidth();kw++){
+								int inStartX = w*stride;
+								int inStartY = h*stride;
+								for(int kh=0;kh<kernelSize;kh++){
+									for(int kw=0;kw<kernelSize;kw++){
 										int curIndex = outputDiff.getIndexByParams(n, c, inStartY+kh, inStartX+kw);
 										outputDiffData[curIndex] = inputDiffData[inputDiff.getIndexByParams(n, c, h, w)];
 									}
@@ -111,12 +122,12 @@ public class PoolMeanLayer extends Layer{
 		// TODO Auto-generated method stub
 		try {
 			out.writeUTF(getType());
-			//保存的时候，batch也就是layerParams的number总是1，因为predict的时候，因为真正使用的时候，这个batch一般都是1
-			layerParams.setNumbers(1);
-			out.writeObject(layerParams);
-			out.writeObject(kernelParams);
-			out.writeInt(kernelHeightStride);
-			out.writeInt(kernelWidthStride);
+			out.writeUTF(getType());
+		    out.writeInt(width);
+		    out.writeInt(height);
+		    out.writeInt(inChannel);
+		    out.writeInt(kernelSize);
+			out.writeInt(stride);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -126,7 +137,28 @@ public class PoolMeanLayer extends Layer{
 	@Override
 	public void loadModel(ObjectInputStream in) {
 		// TODO Auto-generated method stub
-		//do nothing
+		try {
+			width = in.readInt();
+			height = in.readInt();
+			inChannel = in.readInt();
+			kernelSize = in.readInt();
+			stride = in.readInt();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public Blob createOutBlob() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Blob createDiffBlob() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

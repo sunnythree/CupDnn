@@ -24,9 +24,15 @@ public class FullConnectionLayer extends Layer{
 	private Blob b;
 	private transient Blob bGradient;
 	private transient Blob z;
+	private int size;
 	
-	public FullConnectionLayer(Network network,BlobParams layerParams){
-		super(network,layerParams);
+	public FullConnectionLayer(Network network){
+		super(network);
+	}
+	
+	public FullConnectionLayer(Network network,int size){
+		super(network);
+		this.size = size;
 	}
 	
 	@Override
@@ -203,9 +209,7 @@ public class FullConnectionLayer extends Layer{
 		// TODO Auto-generated method stub
 		try {
 			out.writeUTF(getType());
-			//保存的时候，batch也就是layerParams的number总是1，因为predict的时候，因为真正使用的时候，这个batch一般都是1
-			layerParams.setNumbers(1);
-			out.writeObject(layerParams);
+			out.writeInt(size);
 			out.writeObject(w);
 			out.writeObject(b);
 			if(activationFunc != null){
@@ -222,6 +226,7 @@ public class FullConnectionLayer extends Layer{
 	public void loadModel(ObjectInputStream in) {
 		// TODO Auto-generated method stub
 		try {
+			size = in.readInt();
 			w = (Blob) in.readObject();
 			b = (Blob) in.readObject();
 			String activationType = in.readUTF();
@@ -239,6 +244,18 @@ public class FullConnectionLayer extends Layer{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public Blob createOutBlob() {
+		// TODO Auto-generated method stub
+		return new Blob(mNetwork.getBatch(),size,1,1);
+	}
+
+	@Override
+	public Blob createDiffBlob() {
+		// TODO Auto-generated method stub
+		return new Blob(mNetwork.getBatch(),size,1,1);
 	}
 
 

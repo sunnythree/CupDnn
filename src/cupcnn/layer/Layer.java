@@ -15,23 +15,17 @@ public abstract class Layer{
 	protected int id;
 	protected Network mNetwork;
 	protected ActivationFunc activationFunc;
-	protected BlobParams layerParams;
 	//BlobParams中的四个参数说明
 	//第一个：batch,就是一个批次中有多少个图片
 	//第二个：channel,一张图片有多少个通道
 	//第三个：图片的高
 	//第四个：图片的宽
-	public Layer(Network network,BlobParams parames){
+	public Layer(Network network){
 		this.mNetwork = network;
-		this.layerParams = parames;
 		paramsListW = new ArrayList<Blob>();
 		gradientListW = new ArrayList<Blob>();
 		paramsListB = new ArrayList<Blob>();
 		gradientListB = new ArrayList<Blob>();
-	}
-	
-	public BlobParams getLayerParames(){
-		return layerParams;
 	}
 	
 	public void setId(int id){
@@ -40,6 +34,9 @@ public abstract class Layer{
 	public int getId(){
 		return id;
 	}
+	abstract public Blob createOutBlob();
+	abstract public Blob createDiffBlob();
+	
 	public void setActivationFunc(ActivationFunc func){
 		this.activationFunc = func;
 	}

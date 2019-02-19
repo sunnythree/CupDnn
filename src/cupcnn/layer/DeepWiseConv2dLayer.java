@@ -26,15 +26,29 @@ public class DeepWiseConv2dLayer extends Layer{
 	public static final String TYPE = "DeepWiseConv2dLayer";
 	private Blob kernel;
 	private Blob bias;
-	private transient Blob kernelGradient;
-	private transient Blob biasGradient;
-	private transient Blob z;
-	private BlobParams kernelParams;
+	private Blob kernelGradient;
+	private Blob biasGradient;
+	private Blob z;
+	private int width;
+	private int height;
+	private int inChannel;
+	private int outChannel;
+	private int kernelSize;
+	private int stride;
+	
+	public DeepWiseConv2dLayer(Network network){
+		super(network);
+	}
 
-	public DeepWiseConv2dLayer(Network network, BlobParams layerParsms,BlobParams kernelParams) {
+	public DeepWiseConv2dLayer(Network network, int width,int height,int inChannel,int outChannel,int kernelSize,int stride) {
 		// TODO Auto-generated constructor stub
-		super(network, layerParsms);
-		this.kernelParams = kernelParams;
+		super(network);
+		this.width = width;
+		this.height = height;
+		this.inChannel = inChannel;
+		this.outChannel = outChannel;
+		this.kernelSize = kernelSize;
+		this.stride = stride;
 	}
 
 	@Override
@@ -49,8 +63,8 @@ public class DeepWiseConv2dLayer extends Layer{
 		Blob output = mNetwork.getDatas().get(id);
 		//layerParams.getHeight()表示该层需要提取的特征数量
 		if(kernel ==null && bias == null){
-			kernel = new Blob(kernelParams.getNumbers(),kernelParams.getChannels(),kernelParams.getHeight(),kernelParams.getWidth());
-			bias = new Blob(kernelParams.getNumbers(),kernelParams.getChannels(),1,1);
+			kernel = new Blob(mNetwork.getBatch(),outChannel,kernelSize,kernelSize);
+			bias = new Blob(mNetwork.getBatch(),outChannel,1,1);
 			//init params
 			MathFunctions.gaussianInitData(kernel.getData());
 			MathFunctions.constantInitData(bias.getData(), 0.1);
@@ -204,10 +218,13 @@ public class DeepWiseConv2dLayer extends Layer{
 		// TODO Auto-generated method stub
 		try {
 			out.writeUTF(getType());
-			//保存的时候，batch也就是layerParams的number总是1，因为predict的时候，因为真正使用的时候，这个batch一般都是1
-			layerParams.setNumbers(1);
-			out.writeObject(layerParams);
-			out.writeObject(kernelParams);
+			out.writeUTF(getType());
+			out.writeInt(width);
+			out.writeInt(height);
+			out.writeInt(inChannel);
+			out.writeInt(outChannel);
+			out.writeInt(kernelSize);
+			out.writeInt(stride);
 			out.writeObject(kernel);
 			out.writeObject(bias);
 			if(activationFunc != null){
@@ -224,6 +241,12 @@ public class DeepWiseConv2dLayer extends Layer{
 	public void loadModel(ObjectInputStream in) {
 		// TODO Auto-generated method stub
 		try {
+			width = in.readInt();
+			height = in.readInt();
+			inChannel = in.readInt();
+			outChannel = in.readInt();
+			kernelSize = in.readInt();
+			stride = in.readInt();
 			kernel = (Blob) in.readObject();
 			bias = (Blob) in.readObject();
 			String activationType = in.readUTF();
@@ -241,5 +264,17 @@ public class DeepWiseConv2dLayer extends Layer{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	@Override
+	public Blob createOutBlob() {
+		// TODO Auto-generated method stub
+		return new Blob(mNetwork.getBatch(),outChannel,height,width);
+	}
+
+	@Override
+	public Blob createDiffBlob() {
+		// TODO Auto-generated method stub
+		return new Blob(mNetwork.getBatch(),outChannel,height,width);
 	}
 }

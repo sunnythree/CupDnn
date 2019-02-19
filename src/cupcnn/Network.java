@@ -96,11 +96,9 @@ public class Network{
 	
 	public void prepare(){
 		for(int i=0;i<layers.size();i++){
-			BlobParams layerParams = layers.get(i).getLayerParames();
-			assert (layerParams.getNumbers()>0 && layerParams.getChannels()>0 && layerParams.getHeight()>0 && layerParams.getWidth() >0):"prapare---layer params error";
-			Blob data = new Blob(batch,layerParams.getChannels(),layerParams.getHeight(),layerParams.getWidth());
+			Blob data = layers.get(i).createOutBlob();
 			datas.add(data);
-			Blob diff = new Blob(data.getNumbers(),data.getChannels(),data.getHeight(),data.getWidth());
+			Blob diff = layers.get(i).createDiffBlob();
 			diffs.add(diff);
 			layers.get(i).setId(i);
 			layers.get(i).prepare();
@@ -211,83 +209,33 @@ public class Network{
 			for(int i=0;i<layersSize;i++){
 				layerType = in.readUTF();
 				if(layerType.equals(InputLayer.TYPE)){
-					try {
-						BlobParams layerParams = (BlobParams) in.readObject();
-						InputLayer inputLayer = new InputLayer(Network.this,layerParams);
-						inputLayer.loadModel(in);
-						layers.add(inputLayer);
-					} catch (ClassNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					InputLayer inputLayer = new InputLayer(Network.this);
+					inputLayer.loadModel(in);
+					layers.add(inputLayer);
 				}else if(layerType.equals(DeepWiseConv2dLayer.TYPE)){
-					try {
-						BlobParams layerParams = (BlobParams) in.readObject();
-						BlobParams kernelParams = (BlobParams) in.readObject();
-						DeepWiseConv2dLayer conv = new DeepWiseConv2dLayer(Network.this,layerParams,kernelParams);
-						conv.loadModel(in);
-						layers.add(conv);
-					} catch (ClassNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					DeepWiseConv2dLayer conv = new DeepWiseConv2dLayer(Network.this);
+					conv.loadModel(in);
+					layers.add(conv);
 				}else if(layerType.equals(Conv2dLayer.TYPE)){
-					try {
-						BlobParams layerParams = (BlobParams) in.readObject();
-						BlobParams kernelParams = (BlobParams) in.readObject();
-						Conv2dLayer conv = new Conv2dLayer(Network.this,layerParams,kernelParams);
-						conv.loadModel(in);
-						layers.add(conv);
-					} catch (ClassNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					Conv2dLayer conv = new Conv2dLayer(Network.this);
+					conv.loadModel(in);
+					layers.add(conv);
 				}else if(layerType.equals(FullConnectionLayer.TYPE)){
-					try {
-						BlobParams layerParams = (BlobParams) in.readObject();
-						FullConnectionLayer fc = new FullConnectionLayer(Network.this,layerParams);
-						fc.loadModel(in);
-						layers.add(fc);
-					} catch (ClassNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					FullConnectionLayer fc = new FullConnectionLayer(Network.this);
+					fc.loadModel(in);
+					layers.add(fc);
 				}else if(layerType.equals(PoolMaxLayer.TYPE)){
-					try {
-						BlobParams layerParams = (BlobParams) in.readObject();
-						BlobParams kernelParams = (BlobParams) in.readObject();	
-						int kernelHeightStride = in.readInt();
-						int kernelWidthStride = in.readInt();
-						PoolMaxLayer pMax = new PoolMaxLayer(Network.this,layerParams,kernelParams,kernelHeightStride,kernelWidthStride);
-						pMax.loadModel(in);
-						layers.add(pMax);
-					} catch (ClassNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					PoolMaxLayer pMax = new PoolMaxLayer(Network.this);
+					pMax.loadModel(in);
+					layers.add(pMax);
 				}else if(layerType.equals(PoolMeanLayer.TYPE)){
-					try {
-						BlobParams layerParams = (BlobParams) in.readObject();
-						BlobParams kernelParams = (BlobParams) in.readObject();	
-						int kernelHeightStride = in.readInt();
-						int kernelWidthStride = in.readInt();
-						PoolMeanLayer pMean = new PoolMeanLayer(Network.this,layerParams,kernelParams,kernelHeightStride,kernelWidthStride);
-						pMean.loadModel(in);
-						layers.add(pMean);
-					} catch (ClassNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					PoolMeanLayer pMean = new PoolMeanLayer(Network.this);
+					pMean.loadModel(in);
+					layers.add(pMean);
 				}else if(layerType.equals(SoftMaxLayer.TYPE)){
-					try {
-						BlobParams layerParams = (BlobParams) in.readObject();
-						SoftMaxLayer softMax = new SoftMaxLayer(Network.this,layerParams);
-						softMax.loadModel(in);
-						layers.add(softMax);
-					} catch (ClassNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					SoftMaxLayer softMax = new SoftMaxLayer(Network.this);
+					softMax.loadModel(in);
+					layers.add(softMax);
 				}else{
 					System.out.println("load model error");
 					System.exit(-1);
