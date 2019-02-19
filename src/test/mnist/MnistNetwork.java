@@ -71,11 +71,11 @@ public class MnistNetwork {
 		network.addLayer(pool2);
 		
 		
-		FullConnectionLayer fc1 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),512,1,1));
+		FullConnectionLayer fc1 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),256,1,1));
 		fc1.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(fc1);
 		
-		FullConnectionLayer fc2 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),64,1,1));
+		FullConnectionLayer fc2 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),32,1,1));
 		fc2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(fc2);
 		
@@ -96,8 +96,8 @@ public class MnistNetwork {
 		optimizer = new SGDOptimizer(0.1,3.0,Optimizer.GMode.L2,numOfTrainData);
 		network.setOptimizer(optimizer);
 		
-		//buildFcNetwork();
-		buildConvNetwork();
+		buildFcNetwork();
+		//buildConvNetwork();
 
 		network.prepare();
 	}
@@ -205,8 +205,10 @@ public class MnistNetwork {
 		System.out.println("testing...... please wait for a moment!");
 		int batch = network.getBatch();
 		int correctCount = 0;
+		int allCount = 0;
 		int i = 0;
 		for(i=0;i<=imgList.size()-batch;i+=batch){
+			allCount += batch;
 			List<Blob> inputAndLabel = buildBlobByImageList(imgList,i,batch,1,28,28);
 			Blob output = network.predict(inputAndLabel.get(0));
 			int[] calOutLabels = getBatchOutputLabel(output.getData());
@@ -218,8 +220,8 @@ public class MnistNetwork {
 			}
 		}
 		
-		double accuracy = correctCount/(i*1.0+1-batch);
-		System.out.println("test accuracy is "+accuracy+" correctCount "+correctCount);
+		double accuracy = correctCount/(float)allCount;
+		System.out.println("test accuracy is "+accuracy+" correctCount "+correctCount+" allCount "+allCount);
 	}
 	
 	public void saveModel(String name){

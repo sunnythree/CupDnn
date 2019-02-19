@@ -203,8 +203,10 @@ public class Cifar10Network {
 		System.out.println("test...... please wait for a moment!");
 		int batch = network.getBatch();
 		int correctCount = 0;
+		int allCount = 0;
 		int i = 0;
 		for(i=0;i<=imgList.size()-batch;i+=batch){
+			allCount += batch;
 			List<Blob> inputAndLabel = buildBlobByImageList(imgList,i,batch,3,32,32);
 			Blob output = network.predict(inputAndLabel.get(0));
 			int[] calOutLabels = getBatchOutputLabel(output.getData());
@@ -216,8 +218,8 @@ public class Cifar10Network {
 			}
 		}
 		
-		double accuracy = correctCount/(i*1.0+1-batch);
-		System.out.println("test accuracy is "+accuracy+" correctCount "+correctCount);
+		double accuracy = correctCount/(float)allCount;
+		System.out.println("test accuracy is "+accuracy+" correctCount "+correctCount+" allCount "+allCount);
 	}
 	
 	public void saveModel(String name){
