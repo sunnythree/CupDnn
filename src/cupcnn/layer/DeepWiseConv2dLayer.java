@@ -14,6 +14,11 @@ import cupcnn.data.Blob;
 import cupcnn.data.BlobParams;
 import cupcnn.util.MathFunctions;
 
+/*
+ * 深度可分离卷积
+ * 深度可分离卷积要求输出通道是输入通道的整数倍
+ * 比如输入通道是6，则输出通道只能是6，12，18，24......
+ */
 public class DeepWiseConv2dLayer extends Layer{
 	public static final String TYPE = "DeepWiseConv2dLayer";
 	private Blob kernel;
