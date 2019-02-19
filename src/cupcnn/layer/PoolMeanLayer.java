@@ -122,7 +122,6 @@ public class PoolMeanLayer extends Layer{
 		// TODO Auto-generated method stub
 		try {
 			out.writeUTF(getType());
-			out.writeUTF(getType());
 		    out.writeInt(width);
 		    out.writeInt(height);
 		    out.writeInt(inChannel);
