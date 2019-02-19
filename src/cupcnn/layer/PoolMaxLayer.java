@@ -158,13 +158,13 @@ public class PoolMaxLayer extends Layer{
 	@Override
 	public Blob createOutBlob() {
 		// TODO Auto-generated method stub
-		return null;
+		return new Blob(mNetwork.getBatch(),inChannel,width/2,height/2);
 	}
 
 	@Override
 	public Blob createDiffBlob() {
 		// TODO Auto-generated method stub
-		return null;
+		return new Blob(mNetwork.getBatch(),inChannel,width/2,height/2);
 	}
 
 }

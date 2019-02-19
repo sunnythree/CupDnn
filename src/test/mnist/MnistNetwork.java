@@ -63,11 +63,11 @@ public class MnistNetwork {
 		PoolMaxLayer pool1 = new PoolMaxLayer(network,28,28,6,2,2);
 		network.addLayer(pool1);
 		
-		Conv2dLayer conv2 = new Conv2dLayer(network,28,28,6,6,3,1);
+		Conv2dLayer conv2 = new Conv2dLayer(network,14,14,6,6,3,1);
 		conv2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(conv2);
 		
-		PoolMeanLayer pool2 = new PoolMeanLayer(network,28,28,6,2,2);
+		PoolMeanLayer pool2 = new PoolMeanLayer(network,14,14,6,2,2);
 		network.addLayer(pool2);
 		
 		
@@ -97,8 +97,8 @@ public class MnistNetwork {
 		optimizer = new SGDOptimizer(0.1,3.0,Optimizer.GMode.L2,numOfTrainData);
 		network.setOptimizer(optimizer);
 		
-		buildFcNetwork();
-		//buildConvNetwork();
+		//buildFcNetwork();
+		buildConvNetwork();
 
 		network.prepare();
 	}
