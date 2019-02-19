@@ -4,6 +4,7 @@ import cupcnn.data.Blob;
 import cupcnn.data.BlobParams;
 import cupcnn.util.MathFunctions;
 import cupcnn.util.Task;
+import cupcnn.util.ThreadPoolManager;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -90,7 +91,7 @@ public class FullConnectionLayer extends Layer{
 				}
 			});
 		}
-
+		ThreadPoolManager.getInstance(mNetwork).dispatchTask(workers);
 	}
 
 	@Override
@@ -110,24 +111,40 @@ public class FullConnectionLayer extends Layer{
 		//update diff
 		//先乘激活函数的偏导数,即可求出当前层的误差
 		assert inputDiff.getSize()==z.getSize():"inputDiff.getSize()==z.getSize() error";
+		Vector<Task<Object>> workers = new Vector<Task<Object>>();
 		if(activationFunc != null){
 			for(int n=0; n < inputDiff.getNumbers();n++){
-				for(int ids = 0; ids < inputDiff.get3DSize(); ids++){
-					inputDiffData[n*inputDiff.get3DSize()+ids] *= activationFunc.diffActive(zData[n*inputDiff.get3DSize()+ids]);
-				}
-			}		
+				workers.add(new Task<Object>(n) {
+					@Override
+				    public Object call() throws Exception {
+						for(int ids = 0; ids < inputDiff.get3DSize(); ids++){
+							inputDiffData[n*inputDiff.get3DSize()+ids] *= activationFunc.diffActive(zData[n*inputDiff.get3DSize()+ids]);
+						}
+						return null;
+					}
+				});
+			}
+			ThreadPoolManager.getInstance(mNetwork).dispatchTask(workers);
 		}
 
 		//update weight
 		wGradient.fillValue(0);
+		workers.clear();
 		for(int n = 0; n < inputDiff.getNumbers(); n++){
-			for(int ids = 0; ids < inputDiff.get3DSize(); ids++){
-				for(int is = 0; is < input.get3DSize(); is++){
-					//相当于一个神经元和它的每一个连接乘加
-					wGradientData[ids*input.get3DSize()+is] += inputData[n*input.get3DSize()+is] * inputDiffData[n*inputDiff.get3DSize()+ids];
+			workers.add(new Task<Object>(n) {
+				@Override
+			    public Object call() throws Exception {
+					for(int ids = 0; ids < inputDiff.get3DSize(); ids++){
+						for(int is = 0; is < input.get3DSize(); is++){
+							//相当于一个神经元和它的每一个连接乘加
+							wGradientData[ids*input.get3DSize()+is] += inputData[n*input.get3DSize()+is] * inputDiffData[n*inputDiff.get3DSize()+ids];
+						}
+					}
+					return null;
 				}
-			}
+			});
 		}
+		ThreadPoolManager.getInstance(mNetwork).dispatchTask(workers);
 		//平均
 		MathFunctions.dataDivConstant(wGradientData, input.getNumbers());
 		
@@ -146,13 +163,21 @@ public class FullConnectionLayer extends Layer{
 		//每一个输出=每一个神经元与连接他的权重的乘加
 		if(id<=1)return;
 		outputDiff.fillValue(0);
+		workers.clear();
 		for(int n = 0; n < outputDiff.getNumbers();n++){
-			for(int ids = 0; ids < inputDiff.get3DSize(); ids++){
-				for(int ods = 0; ods < outputDiff.get3DSize(); ods++){
-					outputDiffData[n*outputDiff.get3DSize()+ods] += inputDiffData[n*inputDiff.get3DSize()+ids]*wData[ids*w.get3DSize()+ods];
+			workers.add(new Task<Object>(n) {
+				@Override
+			    public Object call() throws Exception {
+					for(int ids = 0; ids < inputDiff.get3DSize(); ids++){
+						for(int ods = 0; ods < outputDiff.get3DSize(); ods++){
+							outputDiffData[n*outputDiff.get3DSize()+ods] += inputDiffData[n*inputDiff.get3DSize()+ids]*wData[ids*w.get3DSize()+ods];
+						}
+					}
+					return null;
 				}
-			}
+			});
 		}	
+		ThreadPoolManager.getInstance(mNetwork).dispatchTask(workers);
 		
 		paramsListW.clear();
 		paramsListW.add(w);

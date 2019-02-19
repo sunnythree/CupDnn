@@ -3,10 +3,13 @@ package cupcnn.layer;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Vector;
 
 import cupcnn.Network;
 import cupcnn.data.Blob;
 import cupcnn.data.BlobParams;
+import cupcnn.util.Task;
+import cupcnn.util.ThreadPoolManager;
 
 public class SoftMaxLayer extends Layer{
 	public static final String TYPE = "SoftMaxLayer";
@@ -37,37 +40,45 @@ public class SoftMaxLayer extends Layer{
 		double[] outputData = output.getData();
 		assert input.getSize()==output.getSize():"SoftMax forward---- input.getSize()==output.getSize() error";
 	
+		Vector<Task<Object>> workers = new Vector<Task<Object>>();
 		for(int n=0;n<input.getNumbers();n++){
-			double sum = 0.0;
-			double max = 0.01;
-			
-			//查找最大值
-			for(int is=0;is<input.get3DSize();is++){
-				max = Math.max(max, inputData[n*input.get3DSize()+is]);
-			}
-			//求和
-			for(int is=0;is<input.get3DSize();is++){
-				outputData[n*input.get3DSize()+is] = Math.exp(inputData[n*input.get3DSize()+is]-max);
-				sum += outputData[n*input.get3DSize()+is];
-			}
-			if(sum==0){
-				System.out.println("sum is zero");
-				System.exit(0);
-			}
-			//每一项除以sum
-			for(int os=0;os<output.get3DSize();os++){
-				outputData[n*output.get3DSize()+os] = outputData[n*output.get3DSize()+os]/sum;
-			}
-			
-//			//求和
-//			for(int is=0;is<input.get3DSize();is++){
-//				sum += Math.exp(inputData[n*input.get3DSize()+is]);
-//			}
-//			//每一项除以sum
-//			for(int os=0;os<output.get3DSize();os++){
-//				outputData[n*output.get3DSize()+os] = Math.exp(inputData[n*output.get3DSize()+os])/sum;
-//			}
+			workers.add(new Task<Object>(n) {
+				@Override
+			    public Object call() throws Exception {
+					double sum = 0.0;
+					double max = 0.01;
+					
+					//查找最大值
+					for(int is=0;is<input.get3DSize();is++){
+						max = Math.max(max, inputData[n*input.get3DSize()+is]);
+					}
+					//求和
+					for(int is=0;is<input.get3DSize();is++){
+						outputData[n*input.get3DSize()+is] = Math.exp(inputData[n*input.get3DSize()+is]-max);
+						sum += outputData[n*input.get3DSize()+is];
+					}
+					if(sum==0){
+						System.out.println("sum is zero");
+						System.exit(0);
+					}
+					//每一项除以sum
+					for(int os=0;os<output.get3DSize();os++){
+						outputData[n*output.get3DSize()+os] = outputData[n*output.get3DSize()+os]/sum;
+					}
+					
+//					//求和
+//					for(int is=0;is<input.get3DSize();is++){
+//						sum += Math.exp(inputData[n*input.get3DSize()+is]);
+//					}
+//					//每一项除以sum
+//					for(int os=0;os<output.get3DSize();os++){
+//						outputData[n*output.get3DSize()+os] = Math.exp(inputData[n*output.get3DSize()+os])/sum;
+//					}
+					return null;
+				}
+			});
 		}
+		ThreadPoolManager.getInstance(mNetwork).dispatchTask(workers);
 	}
 
 	@Override
@@ -83,19 +94,27 @@ public class SoftMaxLayer extends Layer{
 		
 		//先求softmax函数的偏导数
 		outputDiff.fillValue(0);
+		Vector<Task<Object>> workers = new Vector<Task<Object>>();
 		for(int n=0;n<inputDiff.getNumbers();n++){
-			for(int ods=0;ods<outputDiff.get3DSize();ods++){
-				for(int ids=0;ids<inputDiff.get3DSize();ids++){
-					if(ids==ods){
-						outputDiffData[n*output.get3DSize()+ods] += outputData[n*output.get3DSize()+ods]*(1.0-outputData[n*output.get3DSize()+ods])
-								*inputDiffData[n*output.get3DSize()+ids];
-					}else{
-						outputDiffData[n*output.get3DSize()+ods] -= outputData[n*output.get3DSize()+ods]*outputData[n*output.get3DSize()+ids]
-								*inputDiffData[n*output.get3DSize()+ids];
+			workers.add(new Task<Object>(n) {
+				@Override
+			    public Object call() throws Exception {
+					for(int ods=0;ods<outputDiff.get3DSize();ods++){
+						for(int ids=0;ids<inputDiff.get3DSize();ids++){
+							if(ids==ods){
+								outputDiffData[n*output.get3DSize()+ods] += outputData[n*output.get3DSize()+ods]*(1.0-outputData[n*output.get3DSize()+ods])
+										*inputDiffData[n*output.get3DSize()+ids];
+							}else{
+								outputDiffData[n*output.get3DSize()+ods] -= outputData[n*output.get3DSize()+ods]*outputData[n*output.get3DSize()+ids]
+										*inputDiffData[n*output.get3DSize()+ids];
+							}
+						}
 					}
+					return null;
 				}
-			}
+			});
 		}
+		ThreadPoolManager.getInstance(mNetwork).dispatchTask(workers);
 	}
 
 	@Override

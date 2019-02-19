@@ -3,10 +3,13 @@ package cupcnn.layer;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Vector;
 
 import cupcnn.Network;
 import cupcnn.data.Blob;
 import cupcnn.data.BlobParams;
+import cupcnn.util.Task;
+import cupcnn.util.ThreadPoolManager;
 
 public class PoolMeanLayer extends Layer{
 	public static final String TYPE = "PoolMeanLayer";
@@ -41,24 +44,32 @@ public class PoolMeanLayer extends Layer{
 		Blob output = mNetwork.getDatas().get(id);
 		double [] outputData = output.getData();
 		double [] inputData = input.getData();
+		Vector<Task<Object>> workers = new Vector<Task<Object>>();
 		for(int n=0;n<output.getNumbers();n++){
-			for(int c=0;c<output.getChannels();c++){
-				for(int h=0;h<output.getHeight();h++){
-					for(int w=0;w<output.getWidth();w++){
-						int inStartX = w*kernelWidthStride;
-						int inStartY = h*kernelHeightStride;
-						double sum = 0;
-						for(int kh=0;kh<kernelParams.getHeight();kh++){
-							for(int kw=0;kw<kernelParams.getWidth();kw++){
-								int curIndex = input.getIndexByParams(n, c, inStartY+kh, inStartX+kw);
-								sum += inputData[curIndex];
+			workers.add(new Task<Object>(n) {
+				@Override
+			    public Object call() throws Exception {
+					for(int c=0;c<output.getChannels();c++){
+						for(int h=0;h<output.getHeight();h++){
+							for(int w=0;w<output.getWidth();w++){
+								int inStartX = w*kernelWidthStride;
+								int inStartY = h*kernelHeightStride;
+								double sum = 0;
+								for(int kh=0;kh<kernelParams.getHeight();kh++){
+									for(int kw=0;kw<kernelParams.getWidth();kw++){
+										int curIndex = input.getIndexByParams(n, c, inStartY+kh, inStartX+kw);
+										sum += inputData[curIndex];
+									}
+								}
+								outputData[output.getIndexByParams(n, c, h, w)] = sum/(kernelParams.getHeight()*kernelParams.getWidth());
 							}
 						}
-						outputData[output.getIndexByParams(n, c, h, w)] = sum/(kernelParams.getHeight()*kernelParams.getWidth());
 					}
+					return null;
 				}
-			}
+			});
 		}	
+		ThreadPoolManager.getInstance(mNetwork).dispatchTask(workers);
 	}
 
 	@Override
@@ -68,23 +79,31 @@ public class PoolMeanLayer extends Layer{
 		Blob outputDiff = mNetwork.getDiffs().get(id-1);
 		double[] inputDiffData = inputDiff.getData();
 		double[] outputDiffData = outputDiff.getData();
+		Vector<Task<Object>> workers = new Vector<Task<Object>>();
 		for(int n=0;n<inputDiff.getNumbers();n++){
-			for(int c=0;c<inputDiff.getChannels();c++){
-				for(int h=0;h<inputDiff.getHeight();h++){
-					for(int w=0;w<inputDiff.getWidth();w++){
-						int inStartX = w*kernelWidthStride;
-						int inStartY = h*kernelHeightStride;
-						for(int kh=0;kh<kernelParams.getHeight();kh++){
-							for(int kw=0;kw<kernelParams.getWidth();kw++){
-								int curIndex = outputDiff.getIndexByParams(n, c, inStartY+kh, inStartX+kw);
-								outputDiffData[curIndex] = inputDiffData[inputDiff.getIndexByParams(n, c, h, w)];
+			workers.add(new Task<Object>(n) {
+				@Override
+			    public Object call() throws Exception {
+					for(int c=0;c<inputDiff.getChannels();c++){
+						for(int h=0;h<inputDiff.getHeight();h++){
+							for(int w=0;w<inputDiff.getWidth();w++){
+								int inStartX = w*kernelWidthStride;
+								int inStartY = h*kernelHeightStride;
+								for(int kh=0;kh<kernelParams.getHeight();kh++){
+									for(int kw=0;kw<kernelParams.getWidth();kw++){
+										int curIndex = outputDiff.getIndexByParams(n, c, inStartY+kh, inStartX+kw);
+										outputDiffData[curIndex] = inputDiffData[inputDiff.getIndexByParams(n, c, h, w)];
+									}
+								}
+								
 							}
 						}
-						
 					}
+					return null;
 				}
-			}
+			});
 		}	
+		ThreadPoolManager.getInstance(mNetwork).dispatchTask(workers);
 	}
 
 	@Override
