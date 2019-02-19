@@ -5,6 +5,8 @@
 
 package cupcnn.util;
 import java.util.Random;
+import java.util.Vector;
+import java.util.concurrent.Callable;
 
 import cupcnn.data.Blob;
 
@@ -109,7 +111,7 @@ public class MathFunctions {
 		double[] kernelData = kernel.getData();
 		double[] outputData = output.getData();
 		double[] biasData = bias.getData();
-		
+		Vector<Callable> workers = new Vector<Callable>();
 		for(int n=0;n<output.getNumbers();n++){
 			for(int co=0;co<output.getChannels();co++){
 				for(int ci=0;ci<input.getChannels();ci++) {

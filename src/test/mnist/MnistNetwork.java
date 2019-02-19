@@ -56,18 +56,18 @@ public class MnistNetwork {
 		InputLayer layer1 = new InputLayer(network,new BlobParams(network.getBatch(),1,28,28));
 		network.addLayer(layer1);
 		
-		Conv2dLayer conv1 = new Conv2dLayer(network,new BlobParams(network.getBatch(),6,28,28),new BlobParams(1,6,5,5));
+		Conv2dLayer conv1 = new Conv2dLayer(network,new BlobParams(network.getBatch(),6,28,28),new BlobParams(1,6,3,3));
 		conv1.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(conv1);
 		
 		PoolMaxLayer pool1 = new PoolMaxLayer(network,new BlobParams(network.getBatch(),6,14,14),new BlobParams(1,6,2,2),2,2);
 		network.addLayer(pool1);
 		
-		Conv2dLayer conv2 = new Conv2dLayer(network,new BlobParams(network.getBatch(),6,14,14),new BlobParams(1,6,3,3));
+		Conv2dLayer conv2 = new Conv2dLayer(network,new BlobParams(network.getBatch(),12,14,14),new BlobParams(1,12,3,3));
 		conv2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(conv2);
 		
-		PoolMeanLayer pool2 = new PoolMeanLayer(network,new BlobParams(network.getBatch(),6,7,7),new BlobParams(1,6,2,2),2,2);
+		PoolMeanLayer pool2 = new PoolMeanLayer(network,new BlobParams(network.getBatch(),12,7,7),new BlobParams(1,12,2,2),2,2);
 		network.addLayer(pool2);
 		
 		
@@ -183,7 +183,8 @@ public class MnistNetwork {
 			Collections.shuffle(trainLists);
 			for(int i=0;i<=trainLists.size()-batch;i+=batch){
 				List<Blob> inputAndLabel = buildBlobByImageList(trainLists,i,batch,1,28,28);
-				lossValue = network.train(inputAndLabel.get(0), inputAndLabel.get(1));
+				double tmpLoss = network.train(inputAndLabel.get(0), inputAndLabel.get(1));
+				lossValue = (lossValue+tmpLoss)/2;
 				if(i%1000==0) {
 					System.out.print(".");
 				}

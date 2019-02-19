@@ -181,8 +181,9 @@ public class Cifar10Network {
 			Collections.shuffle(trainLists);
 			for(int i=0;i<=trainLists.size()-batch;i+=batch){
 				List<Blob> inputAndLabel = buildBlobByImageList(trainLists,i,batch,3,32,32);
-				lossValue = network.train(inputAndLabel.get(0), inputAndLabel.get(1));
-				if(i%2000==0) {
+				double tmpLoss = network.train(inputAndLabel.get(0), inputAndLabel.get(1));
+				lossValue = (lossValue+tmpLoss)/2;
+				if(i%1000==0) {
 					System.out.print(".");
 				}
 			}

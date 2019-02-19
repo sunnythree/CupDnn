@@ -35,11 +35,20 @@ public class Network{
 	private Loss loss;
 	private Optimizer optimizer;
 	private int batch = 1;
+	private int threadNum = 4;
 	
 	public Network(){
 		datas = new ArrayList<Blob>();
 		diffs = new ArrayList<Blob>();
 		layers = new ArrayList<Layer>();
+	}
+	
+	public int getThreadNum() {
+		return threadNum;
+	}
+	
+	public void setThreadNum(int num) {
+		threadNum = num;
 	}
 	/*
 	 *添加创建的层
