@@ -16,7 +16,8 @@ import cupcnn.active.SigmodActivationFunc;
 import cupcnn.active.TanhActivationFunc;
 import cupcnn.data.Blob;
 import cupcnn.data.BlobParams;
-import cupcnn.layer.ConvolutionLayer;
+import cupcnn.layer.Conv2dLayer;
+import cupcnn.layer.DeepWiseConv2dLayer;
 import cupcnn.layer.FullConnectionLayer;
 import cupcnn.layer.InputLayer;
 import cupcnn.layer.PoolMaxLayer;
@@ -55,30 +56,25 @@ public class MnistNetwork {
 		InputLayer layer1 = new InputLayer(network,new BlobParams(network.getBatch(),1,28,28));
 		network.addLayer(layer1);
 		
-		ConvolutionLayer conv1 = new ConvolutionLayer(network,new BlobParams(network.getBatch(),6,28,28),new BlobParams(1,6,4,4));
+		Conv2dLayer conv1 = new Conv2dLayer(network,new BlobParams(network.getBatch(),6,28,28),new BlobParams(1,6,5,5));
 		conv1.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(conv1);
 		
 		PoolMaxLayer pool1 = new PoolMaxLayer(network,new BlobParams(network.getBatch(),6,14,14),new BlobParams(1,6,2,2),2,2);
 		network.addLayer(pool1);
 		
-		ConvolutionLayer conv2 = new ConvolutionLayer(network,new BlobParams(network.getBatch(),36,14,14),new BlobParams(1,36,3,3));
+		Conv2dLayer conv2 = new Conv2dLayer(network,new BlobParams(network.getBatch(),18,14,14),new BlobParams(1,18,3,3));
 		conv2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(conv2);
 		
-		PoolMeanLayer pool2 = new PoolMeanLayer(network,new BlobParams(network.getBatch(),36,7,7),new BlobParams(1,36,2,2),2,2);
+		PoolMeanLayer pool2 = new PoolMeanLayer(network,new BlobParams(network.getBatch(),18,7,7),new BlobParams(1,18,2,2),2,2);
 		network.addLayer(pool2);
 		
 		
-		FullConnectionLayer fc1 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),512,1,1));
+		FullConnectionLayer fc1 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),256,1,1));
 		fc1.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(fc1);
 		
-
-		FullConnectionLayer fc2 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),64,1,1));
-		fc2.setActivationFunc(new ReluActivationFunc());
-		network.addLayer(fc2);
-
 		FullConnectionLayer fc3 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),10,1,1));
 		fc3.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(fc3);
@@ -93,7 +89,7 @@ public class MnistNetwork {
 		network.setBatch(100);
 		network.setLoss(new LogLikeHoodLoss());
 		//network.setLoss(new CrossEntropyLoss());
-		optimizer = new SGDMOptimizer(0.1,5.0,Optimizer.GMode.L2,numOfTrainData,0.5);
+		optimizer = new SGDMOptimizer(0.01,5.0,Optimizer.GMode.L2,numOfTrainData,0.9);
 		network.setOptimizer(optimizer);
 		
 		//buildFcNetwork();
@@ -190,7 +186,7 @@ public class MnistNetwork {
 			}
 			
 			if(loclaLr>0.001){
-				loclaLr*=0.7;
+				loclaLr*=0.8;
 				optimizer.setLr(loclaLr);
 			}
 		}

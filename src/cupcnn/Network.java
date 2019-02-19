@@ -13,7 +13,8 @@ import java.util.List;
 
 import cupcnn.data.Blob;
 import cupcnn.data.BlobParams;
-import cupcnn.layer.ConvolutionLayer;
+import cupcnn.layer.Conv2dLayer;
+import cupcnn.layer.DeepWiseConv2dLayer;
 import cupcnn.layer.FullConnectionLayer;
 import cupcnn.layer.InputLayer;
 import cupcnn.layer.Layer;
@@ -210,11 +211,22 @@ public class Network{
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-				}else if(layerType.equals(ConvolutionLayer.TYPE)){
+				}else if(layerType.equals(DeepWiseConv2dLayer.TYPE)){
 					try {
 						BlobParams layerParams = (BlobParams) in.readObject();
 						BlobParams kernelParams = (BlobParams) in.readObject();
-						ConvolutionLayer conv = new ConvolutionLayer(Network.this,layerParams,kernelParams);
+						DeepWiseConv2dLayer conv = new DeepWiseConv2dLayer(Network.this,layerParams,kernelParams);
+						conv.loadModel(in);
+						layers.add(conv);
+					} catch (ClassNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}else if(layerType.equals(Conv2dLayer.TYPE)){
+					try {
+						BlobParams layerParams = (BlobParams) in.readObject();
+						BlobParams kernelParams = (BlobParams) in.readObject();
+						Conv2dLayer conv = new Conv2dLayer(Network.this,layerParams,kernelParams);
 						conv.loadModel(in);
 						layers.add(conv);
 					} catch (ClassNotFoundException e) {

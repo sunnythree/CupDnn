@@ -14,8 +14,8 @@ import cupcnn.data.Blob;
 import cupcnn.data.BlobParams;
 import cupcnn.util.MathFunctions;
 
-public class ConvolutionLayer extends Layer{
-	public static final String TYPE = "ConvolutionLayer";
+public class DeepWiseConv2dLayer extends Layer{
+	public static final String TYPE = "DeepWiseConv2dLayer";
 	private Blob kernel;
 	private Blob bias;
 	private transient Blob kernelGradient;
@@ -23,7 +23,7 @@ public class ConvolutionLayer extends Layer{
 	private transient Blob z;
 	private BlobParams kernelParams;
 
-	public ConvolutionLayer(Network network, BlobParams layerParsms,BlobParams kernelParams) {
+	public DeepWiseConv2dLayer(Network network, BlobParams layerParsms,BlobParams kernelParams) {
 		// TODO Auto-generated constructor stub
 		super(network, layerParsms);
 		this.kernelParams = kernelParams;

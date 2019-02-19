@@ -16,7 +16,7 @@ import cupcnn.active.SigmodActivationFunc;
 import cupcnn.active.TanhActivationFunc;
 import cupcnn.data.Blob;
 import cupcnn.data.BlobParams;
-import cupcnn.layer.ConvolutionLayer;
+import cupcnn.layer.Conv2dLayer;
 import cupcnn.layer.FullConnectionLayer;
 import cupcnn.layer.InputLayer;
 import cupcnn.layer.PoolMaxLayer;
@@ -30,7 +30,7 @@ import cupcnn.optimizer.SGDOptimizer;
 
 public class Cifar10Network {
 	Network network;
-	SGDOptimizer optimizer;
+	SGDMOptimizer optimizer;
 	private void buildFcNetwork(){
 		//¸ønetworkÌí¼ÓÍøÂç²ã
 		InputLayer layer1 = new InputLayer(network,new BlobParams(network.getBatch(),3,32,32));
@@ -55,32 +55,27 @@ public class Cifar10Network {
 		InputLayer layer1 = new InputLayer(network,new BlobParams(network.getBatch(),3,32,32));
 		network.addLayer(layer1);
 		
-		ConvolutionLayer conv1 = new ConvolutionLayer(network,new BlobParams(network.getBatch(),12,32,32),new BlobParams(1,12,5,5));
+		Conv2dLayer conv1 = new Conv2dLayer(network,new BlobParams(network.getBatch(),6,32,32),new BlobParams(1,6,5,5));
 		conv1.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(conv1);
 		
-		PoolMaxLayer pool1 = new PoolMaxLayer(network,new BlobParams(network.getBatch(),12,16,16),new BlobParams(1,12,2,2),2,2);
+		PoolMaxLayer pool1 = new PoolMaxLayer(network,new BlobParams(network.getBatch(),6,16,16),new BlobParams(1,6,2,2),2,2);
 		network.addLayer(pool1);
 		
-		ConvolutionLayer conv2 = new ConvolutionLayer(network,new BlobParams(network.getBatch(),48,16,16),new BlobParams(1,48,3,3));
+		Conv2dLayer conv2 = new Conv2dLayer(network,new BlobParams(network.getBatch(),10,16,16),new BlobParams(1,10,3,3));
 		conv2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(conv2);
 		
-		PoolMeanLayer pool2 = new PoolMeanLayer(network,new BlobParams(network.getBatch(),48,8,8),new BlobParams(1,48,2,2),2,2);
+		PoolMeanLayer pool2 = new PoolMeanLayer(network,new BlobParams(network.getBatch(),10,8,8),new BlobParams(1,10,2,2),2,2);
 		network.addLayer(pool2);
 		
-		FullConnectionLayer fc1 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),512,1,1));
+		FullConnectionLayer fc1 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),256,1,1));
 		fc1.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(fc1);
-		
 
-		FullConnectionLayer fc2 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),64,1,1));
+		FullConnectionLayer fc2 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),10,1,1));
 		fc2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(fc2);
-
-		FullConnectionLayer fc3 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),10,1,1));
-		fc3.setActivationFunc(new ReluActivationFunc());
-		network.addLayer(fc3);
 		
 		SoftMaxLayer sflayer = new SoftMaxLayer(network,new BlobParams(network.getBatch(),10,1,1));
 		network.addLayer(sflayer);
@@ -92,7 +87,7 @@ public class Cifar10Network {
 		network.setBatch(30);
 		network.setLoss(new LogLikeHoodLoss());
 		//network.setLoss(new CrossEntropyLoss());
-		optimizer = new SGDOptimizer(0.1,3.0,Optimizer.GMode.L2,numOfTrainData);
+		optimizer = new SGDMOptimizer(0.01,3.0,Optimizer.GMode.L2,numOfTrainData,0.6);
 		network.setOptimizer(optimizer);
 		
 		//buildFcNetwork();
