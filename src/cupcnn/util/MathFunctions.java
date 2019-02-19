@@ -8,6 +8,7 @@ import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.Callable;
 
+import cupcnn.Network;
 import cupcnn.data.Blob;
 
 public class MathFunctions {
@@ -106,73 +107,87 @@ public class MathFunctions {
 		}
 	}
 	
-	public static void conv2dBlobSame(Blob input,Blob kernel,Blob bias,Blob output){
+	public static void conv2dBlobSame(Network network,Blob input,Blob kernel,Blob bias,Blob output){
 		double[] inputData = input.getData();
 		double[] kernelData = kernel.getData();
 		double[] outputData = output.getData();
 		double[] biasData = bias.getData();
-		Vector<Callable> workers = new Vector<Callable>();
+		//Vector<Task<Object>> workers = new Vector<Task<Object>>();
 		for(int n=0;n<output.getNumbers();n++){
-			for(int co=0;co<output.getChannels();co++){
-				for(int ci=0;ci<input.getChannels();ci++) {
-					for(int h=0;h<output.getHeight();h++){
-						for(int w=0;w<output.getWidth();w++){
-							//先定位到输出的位置
-							//然后遍历kernel,通过kernel定位输入的位置
-							//然后将输入乘以kernel
-							int inStartX = w - kernel.getWidth()/2;
-							int inStartY = h - kernel.getHeight() / 2;
-							//和卷积核乘加
-							for(int kh=0;kh<kernel.getHeight();kh++){
-								for(int kw=0;kw<kernel.getWidth();kw++){
-									int inY = inStartY + kh;
-									int inX = inStartX + kw;
-									if (inY >= 0 && inY < input.getHeight() && inX >= 0 && inX < input.getWidth()){
-										outputData[output.getIndexByParams(n,co,h,w)] += kernelData[kernel.getIndexByParams(0,co*input.getChannels()+ci,kh,kw)]*
-												inputData[input.getIndexByParams(n,ci,inY,inX)];
+			//workers.add(new Task<Object>(n) {
+			//	@Override
+			//    public Object call() throws Exception {
+					for(int co=0;co<output.getChannels();co++){
+						for(int ci=0;ci<input.getChannels();ci++) {
+							for(int h=0;h<output.getHeight();h++){
+								for(int w=0;w<output.getWidth();w++){
+									//先定位到输出的位置
+									//然后遍历kernel,通过kernel定位输入的位置
+									//然后将输入乘以kernel
+									int inStartX = w - kernel.getWidth()/2;
+									int inStartY = h - kernel.getHeight() / 2;
+									//和卷积核乘加
+									for(int kh=0;kh<kernel.getHeight();kh++){
+										for(int kw=0;kw<kernel.getWidth();kw++){
+											int inY = inStartY + kh;
+											int inX = inStartX + kw;
+											if (inY >= 0 && inY < input.getHeight() && inX >= 0 && inX < input.getWidth()){
+												outputData[output.getIndexByParams(n,co,h,w)] += kernelData[kernel.getIndexByParams(0,co*input.getChannels()+ci,kh,kw)]*
+														inputData[input.getIndexByParams(n,ci,inY,inX)];
+											}
+										}
+									}
+									
+									//加偏置
+									if(bias!=null) {
+										outputData[output.getIndexByParams(n,co,h,w)] += biasData[bias.getIndexByParams(0, ci, 0, 0)];
 									}
 								}
-							}
-							
-							//加偏置
-							if(bias!=null) {
-								outputData[output.getIndexByParams(n,co,h,w)] += biasData[bias.getIndexByParams(0, ci, 0, 0)];
-							}
+							}	
 						}
-					}	
-				}
-			}
+					}
+			//       return null;
+			//    }
+			//});
+			//ThreadPoolManager.getInstance(network).dispatchTask(workers);
 		}
 	}
 	
-	public static void conv2dBlobSame(Blob input,Blob kernel,Blob output){
+	public static void conv2dBlobSame(Network network,Blob input,Blob kernel,Blob output){
 		double[] inputData = input.getData();
 		double[] kernelData = kernel.getData();
 		double[] outputData = output.getData();
-		
+		//Vector<Task<Object>> workers = new Vector<Task<Object>>();
 		for(int n=0;n<input.getNumbers();n++){
-			for(int ci=0;ci<input.getChannels();ci++){
-				for(int co=0;co<output.getChannels();co++) {
-					for(int h=0;h<input.getHeight();h++){
-						for(int w=0;w<input.getWidth();w++){
-							
-							int inStartX = w - kernel.getWidth()/2;
-							int inStartY = h - kernel.getHeight() / 2;
-							//和卷积核乘加
-							for(int kh=0;kh<kernel.getHeight();kh++){
-								for(int kw=0;kw<kernel.getWidth();kw++){
-									int inY = inStartY + kh;
-									int inX = inStartX + kw;
-									if (inY >= 0 && inY < output.getHeight() && inX >= 0 && inX < output.getWidth()){
-										outputData[output.getIndexByParams(n,co,inY,inX)] += kernelData[kernel.getIndexByParams(0,ci*output.getChannels()+co,kh,kw)]*
-												inputData[input.getIndexByParams(n,ci,h,w)];
+			//workers.add(new Task<Object>(n) {
+			//	@Override
+			//    public Object call() throws Exception {
+					for(int ci=0;ci<input.getChannels();ci++){
+						for(int co=0;co<output.getChannels();co++) {
+							for(int h=0;h<input.getHeight();h++){
+								for(int w=0;w<input.getWidth();w++){
+									
+									int inStartX = w - kernel.getWidth()/2;
+									int inStartY = h - kernel.getHeight() / 2;
+									//和卷积核乘加
+									for(int kh=0;kh<kernel.getHeight();kh++){
+										for(int kw=0;kw<kernel.getWidth();kw++){
+											int inY = inStartY + kh;
+											int inX = inStartX + kw;
+											if (inY >= 0 && inY < output.getHeight() && inX >= 0 && inX < output.getWidth()){
+												outputData[output.getIndexByParams(n,co,inY,inX)] += kernelData[kernel.getIndexByParams(0,ci*output.getChannels()+co,kh,kw)]*
+														inputData[input.getIndexByParams(n,ci,h,w)];
+											}
+										}
 									}
 								}
 							}
 						}
 					}
-				}
-			}
+			//		return null;
+			//	}
+			//});
+			//ThreadPoolManager.getInstance(network).dispatchTask(workers);
 		}
 	}
 	

@@ -5,6 +5,7 @@ package cupcnn.layer;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Vector;
 
 import cupcnn.Network;
 import cupcnn.active.ReluActivationFunc;
@@ -13,6 +14,8 @@ import cupcnn.active.TanhActivationFunc;
 import cupcnn.data.Blob;
 import cupcnn.data.BlobParams;
 import cupcnn.util.MathFunctions;
+import cupcnn.util.Task;
+import cupcnn.util.ThreadPoolManager;
 
 /*
  * 标准卷积
@@ -70,7 +73,7 @@ public class Conv2dLayer extends Layer{
 		double [] zData = z.getData();
 		//卷积后的结果存贮在z中
 		z.fillValue(0);
-		MathFunctions.conv2dBlobSame(input, kernel, bias, z);
+		MathFunctions.conv2dBlobSame(mNetwork,input, kernel, bias, z);
 		//激活函数
 		if(activationFunc!=null){
 			for(int n=0;n<output.getNumbers();n++){
@@ -113,32 +116,40 @@ public class Conv2dLayer extends Layer{
 		//然后更新参数
 		//计算kernelGradient,这里并不更新kernel,kernel在优化器中更新
 		kernelGradient.fillValue(0);
+		//Vector<Task<Object>> workers = new Vector<Task<Object>>();
 		for(int n=0;n<inputDiff.getNumbers();n++){
-			for(int ci=0;ci<inputDiff.getChannels();ci++){
-				for(int co=0;co<outputDiff.getChannels();co++) {
-					for(int h=0;h<inputDiff.getHeight();h++){
-						for(int w=0;w<inputDiff.getWidth();w++){
-							//先定位到输出的位置
-							//然后遍历kernel,通过kernel定位输入的位置
-							//然后将输入乘以diff
-							int inStartX = w - kernelGradient.getWidth()/2;
-							int inStartY = h - kernelGradient.getHeight()/2;
-							//和卷积核乘加
-				
-							for(int kh=0;kh<kernelGradient.getHeight();kh++){
-								for(int kw=0;kw<kernelGradient.getWidth();kw++){
-									int inY = inStartY + kh;
-									int inX = inStartX + kw;
-									if (inY >= 0 && inY < input.getHeight() && inX >= 0 && inX < input.getWidth()){
-										kernelGradientData[kernelGradient.getIndexByParams(0,  ci, kh, kw)] += inputData[input.getIndexByParams(n,co , inY, inX)]
-												*inputDiffData[inputDiff.getIndexByParams(n, ci, h, w)];
+			//workers.add(new Task<Object>(n) {
+			//	@Override
+			//    public Object call() throws Exception {
+					for(int ci=0;ci<inputDiff.getChannels();ci++){
+						for(int co=0;co<outputDiff.getChannels();co++) {
+							for(int h=0;h<inputDiff.getHeight();h++){
+								for(int w=0;w<inputDiff.getWidth();w++){
+									//先定位到输出的位置
+									//然后遍历kernel,通过kernel定位输入的位置
+									//然后将输入乘以diff
+									int inStartX = w - kernelGradient.getWidth()/2;
+									int inStartY = h - kernelGradient.getHeight()/2;
+									//和卷积核乘加
+						
+									for(int kh=0;kh<kernelGradient.getHeight();kh++){
+										for(int kw=0;kw<kernelGradient.getWidth();kw++){
+											int inY = inStartY + kh;
+											int inX = inStartX + kw;
+											if (inY >= 0 && inY < input.getHeight() && inX >= 0 && inX < input.getWidth()){
+												kernelGradientData[kernelGradient.getIndexByParams(0,  ci, kh, kw)] += inputData[input.getIndexByParams(n,co , inY, inX)]
+														*inputDiffData[inputDiff.getIndexByParams(n, ci, h, w)];
+											}
+										}
 									}
 								}
 							}
 						}
 					}
-				}
-			}
+			//		return null;
+			//	}
+			//});
+			//ThreadPoolManager.getInstance(mNetwork).dispatchTask(workers);
 		}
 		//平均
 		MathFunctions.dataDivConstant(kernelGradientData, inputDiff.getNumbers());
@@ -162,7 +173,7 @@ public class Conv2dLayer extends Layer{
 		//Blob kernelRoate180 = MathFunctions.rotate180Blob(kernel);
 		//然后再做卷积
 		outputDiff.fillValue(0);
-		MathFunctions.conv2dBlobSame(inputDiff, kernel, outputDiff);	
+		MathFunctions.conv2dBlobSame(mNetwork,inputDiff, kernel, outputDiff);	
 		
 		paramsListW.clear();
 		paramsListW.add(kernel);

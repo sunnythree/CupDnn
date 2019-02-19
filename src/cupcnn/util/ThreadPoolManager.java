@@ -37,11 +37,11 @@ public class ThreadPoolManager {
 			threadPool = Executors.newFixedThreadPool(num);
 		}
 	}
-	public void dispatchTask(Vector<Callable> workers) {
+	public void dispatchTask(Vector<Task<Object>> workers) {
 		//接收多线程响应结果
-		Vector<Future> results = new Vector<Future>();
-        for(Callable c: workers) {
-        	Future f = threadPool.submit(c);
+		Vector<Future<Object>> results = new Vector<Future<Object>>();
+        for(Task<Object> c: workers) {
+        	Future<Object> f = threadPool.submit(c);
         	results.add(f);
         }
         for(int i=0;i<results.size();i++) {

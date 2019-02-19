@@ -71,11 +71,11 @@ public class MnistNetwork {
 		network.addLayer(pool2);
 		
 		
-		FullConnectionLayer fc1 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),256,1,1));
+		FullConnectionLayer fc1 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),512,1,1));
 		fc1.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(fc1);
 		
-		FullConnectionLayer fc2 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),32,1,1));
+		FullConnectionLayer fc2 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),64,1,1));
 		fc2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(fc2);
 		
@@ -90,14 +90,15 @@ public class MnistNetwork {
 	public void buildNetwork(int numOfTrainData){
 		//首先构建神经网络对象，并设置参数
 		network = new Network();
+		network.setThreadNum(4);
 		network.setBatch(100);
 		network.setLoss(new LogLikeHoodLoss());
 		//network.setLoss(new CrossEntropyLoss());
 		optimizer = new SGDOptimizer(0.1,3.0,Optimizer.GMode.L2,numOfTrainData);
 		network.setOptimizer(optimizer);
 		
-		buildFcNetwork();
-		//buildConvNetwork();
+		//buildFcNetwork();
+		buildConvNetwork();
 
 		network.prepare();
 	}
@@ -178,8 +179,8 @@ public class MnistNetwork {
 		int batch = network.getBatch();
 		double loclaLr = optimizer.getLr();
 		double lossValue = 0;
+		long start = System.currentTimeMillis();
 		for(int e=0;e<epoes;e++){
-			System.out.println("training...... epoe: "+e+" lossValue: "+lossValue+"  "+" lr: "+optimizer.getLr()+"  ");
 			Collections.shuffle(trainLists);
 			for(int i=0;i<=trainLists.size()-batch;i+=batch){
 				List<Blob> inputAndLabel = buildBlobByImageList(trainLists,i,batch,1,28,28);
@@ -191,10 +192,13 @@ public class MnistNetwork {
 			}
 			//每个epoe做一次测试
 			System.out.println();
+			System.out.println("training...... epoe: "+e+" lossValue: "+lossValue
+					+"  "+" lr: "+optimizer.getLr()+"  "+" cost "+(System.currentTimeMillis()-start));
+		
 			test(testLists);
 			
 			if(loclaLr>0.001){
-				loclaLr*=0.8;
+				loclaLr*=0.7;
 				optimizer.setLr(loclaLr);
 			}
 		}
