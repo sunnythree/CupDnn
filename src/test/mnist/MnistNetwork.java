@@ -63,11 +63,11 @@ public class MnistNetwork {
 		PoolMaxLayer pool1 = new PoolMaxLayer(network,new BlobParams(network.getBatch(),6,14,14),new BlobParams(1,6,2,2),2,2);
 		network.addLayer(pool1);
 		
-		Conv2dLayer conv2 = new Conv2dLayer(network,new BlobParams(network.getBatch(),12,14,14),new BlobParams(1,12,3,3));
+		Conv2dLayer conv2 = new Conv2dLayer(network,new BlobParams(network.getBatch(),24,14,14),new BlobParams(1,24,3,3));
 		conv2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(conv2);
 		
-		PoolMeanLayer pool2 = new PoolMeanLayer(network,new BlobParams(network.getBatch(),12,7,7),new BlobParams(1,12,2,2),2,2);
+		PoolMeanLayer pool2 = new PoolMeanLayer(network,new BlobParams(network.getBatch(),24,7,7),new BlobParams(1,24,2,2),2,2);
 		network.addLayer(pool2);
 		
 		
@@ -90,7 +90,7 @@ public class MnistNetwork {
 	public void buildNetwork(int numOfTrainData){
 		//首先构建神经网络对象，并设置参数
 		network = new Network();
-		network.setThreadNum(4);
+		network.setThreadNum(6);
 		network.setBatch(100);
 		network.setLoss(new LogLikeHoodLoss());
 		//network.setLoss(new CrossEntropyLoss());
@@ -179,9 +179,10 @@ public class MnistNetwork {
 		int batch = network.getBatch();
 		double loclaLr = optimizer.getLr();
 		double lossValue = 0;
-		long start = System.currentTimeMillis();
+		
 		for(int e=0;e<epoes;e++){
 			Collections.shuffle(trainLists);
+			long start = System.currentTimeMillis();
 			for(int i=0;i<=trainLists.size()-batch;i+=batch){
 				List<Blob> inputAndLabel = buildBlobByImageList(trainLists,i,batch,1,28,28);
 				double tmpLoss = network.train(inputAndLabel.get(0), inputAndLabel.get(1));
@@ -198,7 +199,7 @@ public class MnistNetwork {
 			test(testLists);
 			
 			if(loclaLr>0.001){
-				loclaLr*=0.7;
+				loclaLr*=0.8;
 				optimizer.setLr(loclaLr);
 			}
 		}

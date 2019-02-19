@@ -62,11 +62,11 @@ public class Cifar10Network {
 		PoolMaxLayer pool1 = new PoolMaxLayer(network,new BlobParams(network.getBatch(),6,16,16),new BlobParams(1,6,2,2),2,2);
 		network.addLayer(pool1);
 		
-		Conv2dLayer conv2 = new Conv2dLayer(network,new BlobParams(network.getBatch(),12,16,16),new BlobParams(1,12,3,3));
+		Conv2dLayer conv2 = new Conv2dLayer(network,new BlobParams(network.getBatch(),24,16,16),new BlobParams(1,24,3,3));
 		conv2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(conv2);
 		
-		PoolMeanLayer pool2 = new PoolMeanLayer(network,new BlobParams(network.getBatch(),12,8,8),new BlobParams(1,12,2,2),2,2);
+		PoolMeanLayer pool2 = new PoolMeanLayer(network,new BlobParams(network.getBatch(),24,8,8),new BlobParams(1,24,2,2),2,2);
 		network.addLayer(pool2);
 		
 		FullConnectionLayer fc1 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),512,1,1));
@@ -177,8 +177,8 @@ public class Cifar10Network {
 		double loclaLr = optimizer.getLr();
 		double lossValue = 0.0;
 		for(int e=0;e<epoes;e++){
-			System.out.println("training...... epoe: "+e+" lossValue: "+lossValue+"  "+" lr: "+optimizer.getLr()+"  ");
 			Collections.shuffle(trainLists);
+			long start = System.currentTimeMillis();
 			for(int i=0;i<=trainLists.size()-batch;i+=batch){
 				List<Blob> inputAndLabel = buildBlobByImageList(trainLists,i,batch,3,32,32);
 				double tmpLoss = network.train(inputAndLabel.get(0), inputAndLabel.get(1));
@@ -188,7 +188,11 @@ public class Cifar10Network {
 				}
 			}
 			//每个epoe做一次测试
+			//每个epoe做一次测试
 			System.out.println();
+			System.out.println("training...... epoe: "+e+" lossValue: "+lossValue
+					+"  "+" lr: "+optimizer.getLr()+"  "+" cost "+(System.currentTimeMillis()-start));
+		
 			test(testLists);
 			
 			if(loclaLr>0.001){
