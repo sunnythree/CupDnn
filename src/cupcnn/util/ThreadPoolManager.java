@@ -8,6 +8,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import cupcnn.Network;
 
@@ -27,14 +30,14 @@ public class ThreadPoolManager {
 	}
 	
 	//1°¢≈‰÷√œﬂ≥Ã≥ÿ
-    private ExecutorService threadPool;
+    private ThreadPoolExecutor threadPool;
 	private ThreadPoolManager(int num) {
 		if(num<1) {
 			threadNum = 4;
-			threadPool = Executors.newFixedThreadPool(4);
+			threadPool = new ThreadPoolExecutor(4, 4, 1000, TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>());
 		}else {
 			threadNum = num;
-			threadPool = Executors.newFixedThreadPool(num);
+			threadPool = new ThreadPoolExecutor(num, num, 1000, TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>());
 		}
 	}
 	public void dispatchTask(Vector<Task<Object>> workers) {

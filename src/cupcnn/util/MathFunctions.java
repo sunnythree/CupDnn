@@ -39,72 +39,88 @@ public class MathFunctions {
 		}
 	}
 	
-	public static void convolutionBlobSame(Blob input,Blob kernel,Blob bias,Blob output){
+	public static void deepWiseConv2dSame(Network network,Blob input,Blob kernel,Blob bias,Blob output){
 		double[] inputData = input.getData();
 		double[] kernelData = kernel.getData();
 		double[] outputData = output.getData();
 		double[] biasData = bias.getData();
 		
 		int features = output.getChannels()/input.getChannels();
+		Vector<Task<Object>> workers = new Vector<Task<Object>>();
 		for(int n=0;n<output.getNumbers();n++){
-			for(int c=0;c<output.getChannels();c++){
-				int inputChannelIndex = c/features;
-				for(int h=0;h<output.getHeight();h++){
-					for(int w=0;w<output.getWidth();w++){
-						//先定位到输出的位置
-						//然后遍历kernel,通过kernel定位输入的位置
-						//然后将输入乘以kernel
-						int inStartX = w - kernel.getWidth()/2;
-						int inStartY = h - kernel.getHeight() / 2;
-						//和卷积核乘加
-						for(int kh=0;kh<kernel.getHeight();kh++){
-							for(int kw=0;kw<kernel.getWidth();kw++){
-								int inY = inStartY + kh;
-								int inX = inStartX + kw;
-								if (inY >= 0 && inY < input.getHeight() && inX >= 0 && inX < input.getWidth()){
-									outputData[output.getIndexByParams(n,c,h,w)] += kernelData[kernel.getIndexByParams(0,c,kh,kw)]*
-											inputData[input.getIndexByParams(n,inputChannelIndex,inY,inX)];
+			workers.add(new Task<Object>(n) {
+				@Override
+			    public Object call() throws Exception {
+					for(int c=0;c<output.getChannels();c++){
+						int inputChannelIndex = c/features;
+						for(int h=0;h<output.getHeight();h++){
+							for(int w=0;w<output.getWidth();w++){
+								//先定位到输出的位置
+								//然后遍历kernel,通过kernel定位输入的位置
+								//然后将输入乘以kernel
+								int inStartX = w - kernel.getWidth()/2;
+								int inStartY = h - kernel.getHeight() / 2;
+								//和卷积核乘加
+								for(int kh=0;kh<kernel.getHeight();kh++){
+									for(int kw=0;kw<kernel.getWidth();kw++){
+										int inY = inStartY + kh;
+										int inX = inStartX + kw;
+										if (inY >= 0 && inY < input.getHeight() && inX >= 0 && inX < input.getWidth()){
+											outputData[output.getIndexByParams(n,c,h,w)] += kernelData[kernel.getIndexByParams(0,c,kh,kw)]*
+													inputData[input.getIndexByParams(n,inputChannelIndex,inY,inX)];
+										}
+									}
 								}
+								
+								//加偏置
+								outputData[output.getIndexByParams(n,c,h,w)] += biasData[bias.getIndexByParams(0, c, 0, 0)];
 							}
 						}
-						
-						//加偏置
-						outputData[output.getIndexByParams(n,c,h,w)] += biasData[bias.getIndexByParams(0, c, 0, 0)];
 					}
+					return null;
 				}
-			}
+			});
 		}
+		ThreadPoolManager.getInstance(network).dispatchTask(workers);
 	}
 
-	public static void convolutionBlobSame(Blob input,Blob kernel,Blob output){
+	public static void deepWiseConv2dSame(Network network,Blob input,Blob kernel,Blob output){
 		double[] inputData = input.getData();
 		double[] kernelData = kernel.getData();
 		double[] outputData = output.getData();
 		
 		int features = input.getChannels()/output.getChannels();
+		Vector<Task<Object>> workers = new Vector<Task<Object>>();
 		for(int n=0;n<input.getNumbers();n++){
-			for(int c=0;c<input.getChannels();c++){
-				int inputChannelIndex = c/features;
-				for(int h=0;h<input.getHeight();h++){
-					for(int w=0;w<input.getWidth();w++){
-						
-						int inStartX = w - kernel.getWidth()/2;
-						int inStartY = h - kernel.getHeight() / 2;
-						//和卷积核乘加
-						for(int kh=0;kh<kernel.getHeight();kh++){
-							for(int kw=0;kw<kernel.getWidth();kw++){
-								int inY = inStartY + kh;
-								int inX = inStartX + kw;
-								if (inY >= 0 && inY < output.getHeight() && inX >= 0 && inX < output.getWidth()){
-									outputData[output.getIndexByParams(n,inputChannelIndex,inY,inX)] += kernelData[kernel.getIndexByParams(0,c,kh,kw)]*
-											inputData[input.getIndexByParams(n,c,h,w)];
+			workers.add(new Task<Object>(n) {
+				@Override
+			    public Object call() throws Exception {
+					for(int c=0;c<input.getChannels();c++){
+						int inputChannelIndex = c/features;
+						for(int h=0;h<input.getHeight();h++){
+							for(int w=0;w<input.getWidth();w++){
+								
+								int inStartX = w - kernel.getWidth()/2;
+								int inStartY = h - kernel.getHeight() / 2;
+								//和卷积核乘加
+								for(int kh=0;kh<kernel.getHeight();kh++){
+									for(int kw=0;kw<kernel.getWidth();kw++){
+										int inY = inStartY + kh;
+										int inX = inStartX + kw;
+										if (inY >= 0 && inY < output.getHeight() && inX >= 0 && inX < output.getWidth()){
+											outputData[output.getIndexByParams(n,inputChannelIndex,inY,inX)] += kernelData[kernel.getIndexByParams(0,c,kh,kw)]*
+													inputData[input.getIndexByParams(n,c,h,w)];
+										}
+									}
 								}
 							}
 						}
 					}
+					return null;
 				}
-			}
+			});
 		}
+		ThreadPoolManager.getInstance(network).dispatchTask(workers);
 	}
 	
 	public static void conv2dBlobSame(Network network,Blob input,Blob kernel,Blob bias,Blob output){
@@ -112,11 +128,11 @@ public class MathFunctions {
 		double[] kernelData = kernel.getData();
 		double[] outputData = output.getData();
 		double[] biasData = bias.getData();
-		//Vector<Task<Object>> workers = new Vector<Task<Object>>();
+		Vector<Task<Object>> workers = new Vector<Task<Object>>();
 		for(int n=0;n<output.getNumbers();n++){
-			//workers.add(new Task<Object>(n) {
-			//	@Override
-			//    public Object call() throws Exception {
+			workers.add(new Task<Object>(n) {
+				@Override
+			    public Object call() throws Exception {
 					for(int co=0;co<output.getChannels();co++){
 						for(int ci=0;ci<input.getChannels();ci++) {
 							for(int h=0;h<output.getHeight();h++){
@@ -146,22 +162,22 @@ public class MathFunctions {
 							}	
 						}
 					}
-			//       return null;
-			//    }
-			//});
-			//ThreadPoolManager.getInstance(network).dispatchTask(workers);
+			       return null;
+			    }
+			});
 		}
+		ThreadPoolManager.getInstance(network).dispatchTask(workers);
 	}
 	
 	public static void conv2dBlobSame(Network network,Blob input,Blob kernel,Blob output){
 		double[] inputData = input.getData();
 		double[] kernelData = kernel.getData();
 		double[] outputData = output.getData();
-		//Vector<Task<Object>> workers = new Vector<Task<Object>>();
+		Vector<Task<Object>> workers = new Vector<Task<Object>>();
 		for(int n=0;n<input.getNumbers();n++){
-			//workers.add(new Task<Object>(n) {
-			//	@Override
-			//    public Object call() throws Exception {
+			workers.add(new Task<Object>(n) {
+				@Override
+			    public Object call() throws Exception {
 					for(int ci=0;ci<input.getChannels();ci++){
 						for(int co=0;co<output.getChannels();co++) {
 							for(int h=0;h<input.getHeight();h++){
@@ -184,11 +200,11 @@ public class MathFunctions {
 							}
 						}
 					}
-			//		return null;
-			//	}
-			//});
-			//ThreadPoolManager.getInstance(network).dispatchTask(workers);
+					return null;
+				}
+			});
 		}
+		ThreadPoolManager.getInstance(network).dispatchTask(workers);
 	}
 	
 	public static Blob rotate180Blob(Blob input){

@@ -3,11 +3,13 @@ package cupcnn.layer;
 import cupcnn.data.Blob;
 import cupcnn.data.BlobParams;
 import cupcnn.util.MathFunctions;
+import cupcnn.util.Task;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.Vector;
 
 import cupcnn.Network;
 import cupcnn.active.ReluActivationFunc;
@@ -66,20 +68,27 @@ public class FullConnectionLayer extends Layer{
 		double[] bData = b.getData();
 		double[] zData = z.getData();
 		z.fillValue(0);
+		Vector<Task<Object>> workers = new Vector<Task<Object>>();
 		for(int n=0;n<input.getNumbers();n++){
-			for(int os=0;os<output.get3DSize();os++){//有多少个输出，当前层就有多少个神经元
-				//和每个神经元的权重相乘
-				for(int is=0;is<input.get3DSize();is++){
-					//zData[n*output.get3DSize()+os] 表示一个批次中的第n个的第os个神经元
-					zData[n*output.get3DSize()+os] += inputData[n*input.get3DSize()+is]*wData[os*input.get3DSize()+is];
+			workers.add(new Task<Object>(n) {
+				@Override
+			    public Object call() throws Exception {
+					for(int os=0;os<output.get3DSize();os++){//有多少个输出，当前层就有多少个神经元
+						//和每个神经元的权重相乘
+						for(int is=0;is<input.get3DSize();is++){
+							//zData[n*output.get3DSize()+os] 表示一个批次中的第n个的第os个神经元
+							zData[n*output.get3DSize()+os] += inputData[n*input.get3DSize()+is]*wData[os*input.get3DSize()+is];
+						}
+						//偏执
+						zData[n*output.get3DSize()+os] += bData[os];
+						//激活函数
+						if(activationFunc!=null){
+							outputData[n*output.get3DSize()+os] = activationFunc.active(zData[n*output.get3DSize()+os]);
+						}
+					}
+					return null;
 				}
-				//偏执
-				zData[n*output.get3DSize()+os] += bData[os];
-				//激活函数
-				if(activationFunc!=null){
-					outputData[n*output.get3DSize()+os] = activationFunc.active(zData[n*output.get3DSize()+os]);
-				}
-			}
+			});
 		}
 
 	}

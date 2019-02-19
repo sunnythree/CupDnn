@@ -76,15 +76,23 @@ public class Conv2dLayer extends Layer{
 		MathFunctions.conv2dBlobSame(mNetwork,input, kernel, bias, z);
 		//激活函数
 		if(activationFunc!=null){
+			Vector<Task<Object>> workers = new Vector<Task<Object>>();
 			for(int n=0;n<output.getNumbers();n++){
-				for(int c=0;c<output.getChannels();c++){
-					for(int h=0;h<output.getHeight();h++){
-						for(int w=0;w<output.getWidth();w++){
-							outputData[output.getIndexByParams(n, c, h, w)] = activationFunc.active(zData[z.getIndexByParams(n, c, h, w)]);
+				workers.add(new Task<Object>(n) {
+					@Override
+				    public Object call() throws Exception {
+						for(int c=0;c<output.getChannels();c++){
+							for(int h=0;h<output.getHeight();h++){
+								for(int w=0;w<output.getWidth();w++){
+									outputData[output.getIndexByParams(n, c, h, w)] = activationFunc.active(zData[z.getIndexByParams(n, c, h, w)]);
+								}
+							}
 						}
+						return null;
 					}
-				}
+				});
 			}
+			ThreadPoolManager.getInstance(mNetwork).dispatchTask(workers);
 		}
 	}
 
@@ -101,26 +109,34 @@ public class Conv2dLayer extends Layer{
 		double[] biasGradientData = biasGradient.getData();
 		
 		//先乘激活函数的导数,得到该层的误差
+		Vector<Task<Object>> workers = new Vector<Task<Object>>();
 		if(activationFunc!=null){
 			for(int n=0;n<inputDiff.getNumbers();n++){
-				for(int c=0;c<inputDiff.getChannels();c++){
-					for(int h=0;h<inputDiff.getHeight();h++){
-						for(int w=0;w<inputDiff.getWidth();w++){
-							inputDiffData[inputDiff.getIndexByParams(n, c, h, w)] *= activationFunc.diffActive(zData[z.getIndexByParams(n, c, h, w)]);
+				workers.add(new Task<Object>(n) {
+					@Override
+				    public Object call() throws Exception {
+						for(int c=0;c<inputDiff.getChannels();c++){
+							for(int h=0;h<inputDiff.getHeight();h++){
+								for(int w=0;w<inputDiff.getWidth();w++){
+									inputDiffData[inputDiff.getIndexByParams(n, c, h, w)] *= activationFunc.diffActive(zData[z.getIndexByParams(n, c, h, w)]);
+								}
+							}
 						}
+						return null;
 					}
-				}
+				});
 			}
+			ThreadPoolManager.getInstance(mNetwork).dispatchTask(workers);
 		}
 		
 		//然后更新参数
 		//计算kernelGradient,这里并不更新kernel,kernel在优化器中更新
 		kernelGradient.fillValue(0);
-		//Vector<Task<Object>> workers = new Vector<Task<Object>>();
+		workers.clear();
 		for(int n=0;n<inputDiff.getNumbers();n++){
-			//workers.add(new Task<Object>(n) {
-			//	@Override
-			//    public Object call() throws Exception {
+			workers.add(new Task<Object>(n) {
+				@Override
+			    public Object call() throws Exception {
 					for(int ci=0;ci<inputDiff.getChannels();ci++){
 						for(int co=0;co<outputDiff.getChannels();co++) {
 							for(int h=0;h<inputDiff.getHeight();h++){
@@ -146,11 +162,11 @@ public class Conv2dLayer extends Layer{
 							}
 						}
 					}
-			//		return null;
-			//	}
-			//});
-			//ThreadPoolManager.getInstance(mNetwork).dispatchTask(workers);
+					return null;
+				}
+			});
 		}
+		ThreadPoolManager.getInstance(mNetwork).dispatchTask(workers);
 		//平均
 		MathFunctions.dataDivConstant(kernelGradientData, inputDiff.getNumbers());
 		
