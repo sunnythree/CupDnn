@@ -30,7 +30,7 @@ import cupcnn.optimizer.SGDOptimizer;
 
 public class Cifar10Network {
 	Network network;
-	SGDMOptimizer optimizer;
+	SGDOptimizer optimizer;
 	private void buildFcNetwork(){
 		//给network添加网络层
 		InputLayer layer1 = new InputLayer(network,new BlobParams(network.getBatch(),3,32,32));
@@ -62,20 +62,24 @@ public class Cifar10Network {
 		PoolMaxLayer pool1 = new PoolMaxLayer(network,new BlobParams(network.getBatch(),6,16,16),new BlobParams(1,6,2,2),2,2);
 		network.addLayer(pool1);
 		
-		Conv2dLayer conv2 = new Conv2dLayer(network,new BlobParams(network.getBatch(),10,16,16),new BlobParams(1,10,3,3));
+		Conv2dLayer conv2 = new Conv2dLayer(network,new BlobParams(network.getBatch(),12,16,16),new BlobParams(1,12,3,3));
 		conv2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(conv2);
 		
-		PoolMeanLayer pool2 = new PoolMeanLayer(network,new BlobParams(network.getBatch(),10,8,8),new BlobParams(1,10,2,2),2,2);
+		PoolMeanLayer pool2 = new PoolMeanLayer(network,new BlobParams(network.getBatch(),12,8,8),new BlobParams(1,12,2,2),2,2);
 		network.addLayer(pool2);
 		
-		FullConnectionLayer fc1 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),256,1,1));
+		FullConnectionLayer fc1 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),512,1,1));
 		fc1.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(fc1);
-
-		FullConnectionLayer fc2 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),10,1,1));
+		
+		FullConnectionLayer fc2 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),64,1,1));
 		fc2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(fc2);
+
+		FullConnectionLayer fc3 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),10,1,1));
+		fc3.setActivationFunc(new ReluActivationFunc());
+		network.addLayer(fc3);
 		
 		SoftMaxLayer sflayer = new SoftMaxLayer(network,new BlobParams(network.getBatch(),10,1,1));
 		network.addLayer(sflayer);
@@ -84,10 +88,10 @@ public class Cifar10Network {
 	public void buildNetwork(int numOfTrainData){
 		//首先构建神经网络对象，并设置参数
 		network = new Network();
-		network.setBatch(30);
+		network.setBatch(100);
 		network.setLoss(new LogLikeHoodLoss());
 		//network.setLoss(new CrossEntropyLoss());
-		optimizer = new SGDMOptimizer(0.01,3.0,Optimizer.GMode.L2,numOfTrainData,0.6);
+		optimizer = new SGDOptimizer(0.01,3.0,Optimizer.GMode.L2,numOfTrainData);
 		network.setOptimizer(optimizer);
 		
 		//buildFcNetwork();
@@ -167,24 +171,23 @@ public class Cifar10Network {
 	}
 	
 	
-	public void train(List<DigitImage> imgList,int epoes){
-		System.out.println("begin train");
+	public void train(List<DigitImage> trainLists,int epoes,List<DigitImage> testLists){
+		System.out.println("training...... please wait for a moment!");
 		int batch = network.getBatch();
 		double loclaLr = optimizer.getLr();
+		double lossValue = 0.0;
 		for(int e=0;e<epoes;e++){
-			Collections.shuffle(imgList);
-			for(int i=0;i<imgList.size()-batch;i+=batch){
-				List<Blob> inputAndLabel = buildBlobByImageList(imgList,i,batch,3,32,32);
-				double lossValue = network.train(inputAndLabel.get(0), inputAndLabel.get(1));
-				
-				if(i>batch && i/batch%100==0){
-					System.out.print("epoe: "+e+" lossValue: "+lossValue+"  "+" lr: "+optimizer.getLr()+"  ");
-					testInner(inputAndLabel.get(0), inputAndLabel.get(1));
-				}
+			System.out.println("training...... epoe: "+e+" lossValue: "+lossValue+"  "+" lr: "+optimizer.getLr()+"  ");
+			Collections.shuffle(trainLists);
+			for(int i=0;i<trainLists.size()-batch;i+=batch){
+				List<Blob> inputAndLabel = buildBlobByImageList(trainLists,i,batch,3,32,32);
+				lossValue = network.train(inputAndLabel.get(0), inputAndLabel.get(1));
 			}
+			//每个epoe做一次测试
+			test(testLists);
 			
 			if(loclaLr>0.001){
-				loclaLr*=0.7;
+				loclaLr*=0.8;
 				optimizer.setLr(loclaLr);
 			}
 		}
@@ -193,11 +196,11 @@ public class Cifar10Network {
 
 	
 	public void test(List<DigitImage> imgList){
-		System.out.println("begin test");
+		System.out.println("test...... please wait for a moment!");
 		int batch = network.getBatch();
 		int correctCount = 0;
 		int i = 0;
-		for(i=0;i<imgList.size()-batch;i+=batch){
+		for(i=0;i<=imgList.size()-batch;i+=batch){
 			List<Blob> inputAndLabel = buildBlobByImageList(imgList,i,batch,3,32,32);
 			Blob output = network.predict(inputAndLabel.get(0));
 			int[] calOutLabels = getBatchOutputLabel(output.getData());

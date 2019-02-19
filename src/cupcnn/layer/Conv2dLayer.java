@@ -14,6 +14,10 @@ import cupcnn.data.Blob;
 import cupcnn.data.BlobParams;
 import cupcnn.util.MathFunctions;
 
+/*
+ * ±ê×¼¾í»ý
+ */
+
 public class Conv2dLayer extends Layer{
 	public static final String TYPE = "Conv2dLayer";
 	private Blob kernel;
