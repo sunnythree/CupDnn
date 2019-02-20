@@ -32,7 +32,7 @@ public class CrossEntropyLoss extends Loss {
 		for(int n=0;n<height;n++){
 			for(int os=0;os<output.getWidth();os++){
 				diffData[n*width+os] -= (labelData[n*width+os]/outputData[n*width+os]
-						-(1-labelData[n*width+os])/(1-outputData[n*width+os]))/(float)height;
+						-(1-labelData[n*width+os])/(1-outputData[n*width+os]));
 			}
 		}
 	}

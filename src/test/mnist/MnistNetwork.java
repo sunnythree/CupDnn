@@ -45,10 +45,10 @@ public class MnistNetwork {
 		layer3.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(layer3);
 		FullConnectionLayer layer4 = new FullConnectionLayer(network,30,10);
-		layer4.setActivationFunc(new ReluActivationFunc());
+		layer4.setActivationFunc(new SigmodActivationFunc());
 		network.addLayer(layer4);
-		SoftMaxLayer sflayer = new SoftMaxLayer(network,10);
-		network.addLayer(sflayer);
+		//SoftMaxLayer sflayer = new SoftMaxLayer(network,10);
+		//network.addLayer(sflayer);
 	}
 	
 	private void buildConvNetwork(){
@@ -87,10 +87,10 @@ public class MnistNetwork {
 		network = new Network();
 		network.setThreadNum(8);
 		network.setBatch(100);
-		network.setLrAttenuation(0.9f);
+		network.setLrAttenuation(0.8f);
 		//network.setLoss(new LogLikeHoodLoss());
-		//network.setLoss(new CrossEntropyLoss());
-		network.setLoss(new MSELoss());
+		network.setLoss(new CrossEntropyLoss());
+		//network.setLoss(new MSELoss());
 		optimizer = new SGDOptimizer(0.1f);
 		network.setOptimizer(optimizer);
 		
