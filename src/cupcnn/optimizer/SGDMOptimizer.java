@@ -19,8 +19,8 @@ public class SGDMOptimizer extends Optimizer {
 	}
 
 	
-	public SGDMOptimizer(double lr,double lamda,Optimizer.GMode mode,int numOfTrainData,double mententum){
-		super(lr,lamda,mode,numOfTrainData);
+	public SGDMOptimizer(double lr,Optimizer.GMode mode,double lamda,double mententum){
+		super(lr,mode,lamda);
 		this.momentum = mententum;
 	}
 
@@ -74,7 +74,7 @@ public class SGDMOptimizer extends Optimizer {
 			if(mode==GMode.L2) {
 				for(int j=0;j<param.getSize();j++){
 					//Ìí¼Ól2Ë¥¼õ
-					double V = momentum*privData[j]-lr*lamda/(numOfTrainData*1.0)*paramData[j]  - lr*gradData[j];
+					double V = momentum*privData[j]-lr*lamda*paramData[j]  - lr*gradData[j];
 					paramData[j] += V;
 					privData[j] = V;
 				}
@@ -83,9 +83,9 @@ public class SGDMOptimizer extends Optimizer {
 					//Ìí¼Ól1Ë¥¼õ
 					double V = 0;
 					if(paramData[j]>=0) {
-						V = momentum*privData[j] - lr*lamda/(numOfTrainData*1.0)  - lr*gradData[j];
+						V = momentum*privData[j] - lr*lamda  - lr*gradData[j];
 					}else {
-						V = momentum*privData[j] + lr*lamda/(numOfTrainData*1.0)  - lr*gradData[j];
+						V = momentum*privData[j] + lr*lamda - lr*gradData[j];
 					}
 					paramData[j] += V;
 					privData[j] = V;

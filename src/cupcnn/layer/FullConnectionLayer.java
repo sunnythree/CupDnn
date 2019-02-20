@@ -24,29 +24,28 @@ public class FullConnectionLayer extends Layer{
 	private Blob b;
 	private transient Blob bGradient;
 	private transient Blob z;
-	private int size;
+	private int inSize;
+	private int outSize;
 	
 	public FullConnectionLayer(Network network){
 		super(network);
 	}
 	
-	public FullConnectionLayer(Network network,int size){
+	public FullConnectionLayer(Network network,int inSize,int outSize){
 		super(network);
-		this.size = size;
+		this.inSize = inSize;
+		this.outSize = outSize;
 	}
 	
 	@Override
 	public void prepare() {
 		// TODO Auto-generated method stub
-		Blob input = mNetwork.getDatas().get(id-1);
-		Blob output = mNetwork.getDatas().get(id);
-		
 		if(w==null && b==null){
 			//表明该层公有output.get3DSize()个神经元，每个神经元和前面层的input.get3DSize()个神经元向连
-			w = new Blob(output.get3DSize(),input.get3DSize(),1,1);
+			w = new Blob(outSize,inSize,1,1);
 
 			//表明公有output.getChannels()个神经元，每个神经元有一个偏执
-			b = new Blob(output.get3DSize(),1,1,1);
+			b = new Blob(outSize,1,1,1);
 
 
 			//初始化
@@ -61,7 +60,7 @@ public class FullConnectionLayer extends Layer{
 		wGradient = new Blob(w.getNumbers(),w.getChannels(),1,1);
 		bGradient = new Blob(b.getNumbers(),b.getChannels(),1,1);
 		//z是个中间值，计算的时候要用到。
-		z = new Blob(output.getNumbers(),output.get3DSize(),1,1);
+		z = new Blob(mNetwork.getBatch(),outSize,1,1);
 	}
 
 	@Override
@@ -209,7 +208,8 @@ public class FullConnectionLayer extends Layer{
 		// TODO Auto-generated method stub
 		try {
 			out.writeUTF(getType());
-			out.writeInt(size);
+			out.writeInt(inSize);
+			out.writeInt(outSize);
 			out.writeObject(w);
 			out.writeObject(b);
 			if(activationFunc != null){
@@ -226,7 +226,8 @@ public class FullConnectionLayer extends Layer{
 	public void loadModel(ObjectInputStream in) {
 		// TODO Auto-generated method stub
 		try {
-			size = in.readInt();
+			inSize = in.readInt();
+			outSize = in.readInt();
 			w = (Blob) in.readObject();
 			b = (Blob) in.readObject();
 			String activationType = in.readUTF();
@@ -249,13 +250,13 @@ public class FullConnectionLayer extends Layer{
 	@Override
 	public Blob createOutBlob() {
 		// TODO Auto-generated method stub
-		return new Blob(mNetwork.getBatch(),size,1,1);
+		return new Blob(mNetwork.getBatch(),outSize,1,1);
 	}
 
 	@Override
 	public Blob createDiffBlob() {
 		// TODO Auto-generated method stub
-		return new Blob(mNetwork.getBatch(),size,1,1);
+		return new Blob(mNetwork.getBatch(),outSize,1,1);
 	}
 
 

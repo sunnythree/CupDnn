@@ -36,18 +36,15 @@ public class MnistNetwork {
 		//¸ønetworkÌí¼ÓÍøÂç²ã
 		InputLayer layer1 = new InputLayer(network,28,28,1);
 		network.addLayer(layer1);
-		FullConnectionLayer layer2 = new FullConnectionLayer(network,784);
+		FullConnectionLayer layer2 = new FullConnectionLayer(network,28*28,300);
 		layer2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(layer2);
-		FullConnectionLayer layer3 = new FullConnectionLayer(network,100);
+		FullConnectionLayer layer3 = new FullConnectionLayer(network,300,50);
 		layer3.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(layer3);
-		FullConnectionLayer layer4 = new FullConnectionLayer(network,30);
-		layer4.setActivationFunc(new SigmodActivationFunc());
+		FullConnectionLayer layer4 = new FullConnectionLayer(network,50,10);
+		layer4.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(layer4);
-		FullConnectionLayer layer5 = new FullConnectionLayer(network,10);
-		layer5.setActivationFunc(new ReluActivationFunc());
-		network.addLayer(layer5);
 		SoftMaxLayer sflayer = new SoftMaxLayer(network,10);
 		network.addLayer(sflayer);
 	}
@@ -71,15 +68,15 @@ public class MnistNetwork {
 		network.addLayer(pool2);
 		
 		
-		FullConnectionLayer fc1 = new FullConnectionLayer(network,500);
+		FullConnectionLayer fc1 = new FullConnectionLayer(network,7*7*6,500);
 		fc1.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(fc1);
 		
-		FullConnectionLayer fc2 = new FullConnectionLayer(network,50);
+		FullConnectionLayer fc2 = new FullConnectionLayer(network,500,50);
 		fc2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(fc2);
 		
-		FullConnectionLayer fc3 = new FullConnectionLayer(network,10);
+		FullConnectionLayer fc3 = new FullConnectionLayer(network,50,10);
 		fc3.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(fc3);
 		
@@ -94,11 +91,11 @@ public class MnistNetwork {
 		network.setBatch(100);
 		network.setLoss(new LogLikeHoodLoss());
 		//network.setLoss(new CrossEntropyLoss());
-		optimizer = new SGDOptimizer(0.1,3.0,Optimizer.GMode.L2,numOfTrainData);
+		optimizer = new SGDOptimizer(0.1,Optimizer.GMode.L2,0.001);
 		network.setOptimizer(optimizer);
 		
-		//buildFcNetwork();
-		buildConvNetwork();
+		buildFcNetwork();
+		//buildConvNetwork();
 
 		network.prepare();
 	}

@@ -35,18 +35,15 @@ public class Cifar10Network {
 		//¸ønetworkÌí¼ÓÍøÂç²ã
 		InputLayer layer1 = new InputLayer(network,32,32,3);
 		network.addLayer(layer1);
-		FullConnectionLayer layer2 = new FullConnectionLayer(network,3072);
+		FullConnectionLayer layer2 = new FullConnectionLayer(network,32*32*3,800);
 		layer2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(layer2);
-		FullConnectionLayer layer3 = new FullConnectionLayer(network,800);
+		FullConnectionLayer layer3 = new FullConnectionLayer(network,800,100);
 		layer3.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(layer3);
-		FullConnectionLayer layer4 = new FullConnectionLayer(network,100);
+		FullConnectionLayer layer4 = new FullConnectionLayer(network,100,10);
 		layer4.setActivationFunc(new SigmodActivationFunc());
 		network.addLayer(layer4);
-		FullConnectionLayer layer5 = new FullConnectionLayer(network,10);
-		layer5.setActivationFunc(new ReluActivationFunc());
-		network.addLayer(layer5);
 		SoftMaxLayer sflayer = new SoftMaxLayer(network,10);
 		network.addLayer(sflayer);
 	}
@@ -69,15 +66,15 @@ public class Cifar10Network {
 		PoolMeanLayer pool2 = new PoolMeanLayer(network,16,16,24,2,2);
 		network.addLayer(pool2);
 		
-		FullConnectionLayer fc1 = new FullConnectionLayer(network,512);
+		FullConnectionLayer fc1 = new FullConnectionLayer(network,8*8*24,512);
 		fc1.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(fc1);
 		
-		FullConnectionLayer fc2 = new FullConnectionLayer(network,64);
+		FullConnectionLayer fc2 = new FullConnectionLayer(network,512,64);
 		fc2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(fc2);
 
-		FullConnectionLayer fc3 = new FullConnectionLayer(network,10);
+		FullConnectionLayer fc3 = new FullConnectionLayer(network,64,10);
 		fc3.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(fc3);
 		
@@ -91,7 +88,7 @@ public class Cifar10Network {
 		network.setBatch(100);
 		network.setLoss(new LogLikeHoodLoss());
 		//network.setLoss(new CrossEntropyLoss());
-		optimizer = new SGDOptimizer(0.01,3.0,Optimizer.GMode.L2,numOfTrainData);
+		optimizer = new SGDOptimizer(0.01,Optimizer.GMode.L2,0.0001);
 		network.setOptimizer(optimizer);
 		
 		//buildFcNetwork();

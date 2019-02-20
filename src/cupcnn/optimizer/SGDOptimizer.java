@@ -16,8 +16,8 @@ public class SGDOptimizer extends Optimizer {
 	}
 
 	
-	public SGDOptimizer(double lr,double lamda,Optimizer.GMode mode,int numOfTrainData){
-		super(lr,lamda,mode,numOfTrainData);
+	public SGDOptimizer(double lr,Optimizer.GMode mode,double lamda){
+		super(lr,mode,lamda);
 	}
 
 	@Override
@@ -48,15 +48,15 @@ public class SGDOptimizer extends Optimizer {
 			if(mode==GMode.L2) {
 				for(int j=0;j<param.getSize();j++){
 					//Ìí¼Ól2Ë¥¼õ
-					paramData[j] = (1.0-lr*lamda/(numOfTrainData*1.0))*paramData[j]  - lr*gradData[j];
+					paramData[j] = (1.0-lr*lamda)*paramData[j]  - lr*gradData[j];
 				}
 			}else if(mode==GMode.L1){
 				for(int j=0;j<param.getSize();j++){
 					//Ìí¼Ól1Ë¥¼õ
 					if(paramData[j]>=0) {
-						paramData[j] = paramData[j] - lr*lamda/(numOfTrainData*1.0)  - lr*gradData[j];
+						paramData[j] = paramData[j] - lr*lamda - lr*gradData[j];
 					}else {
-						paramData[j] = paramData[j] + lr*lamda/(numOfTrainData*1.0)  - lr*gradData[j];
+						paramData[j] = paramData[j] + lr*lamda - lr*gradData[j];
 					}
 				}				
 			}else {

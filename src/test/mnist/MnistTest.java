@@ -28,7 +28,7 @@ public class MnistTest {
 		
 		MnistNetwork mn = new MnistNetwork();
 		mn.buildNetwork(trains.size());
-		mn.train(trains,1,tests);
+		mn.train(trains,30,tests);
 		//mn.test(tests);
 		mn.saveModel("model/mnist.model");
 		

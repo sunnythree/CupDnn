@@ -6,7 +6,6 @@ import cupcnn.data.Blob;
 public abstract class Optimizer {
 	protected double lr = 0.0;
 	protected double lamda = 0.0;
-	protected int numOfTrainData = 0;
 	public static enum GMode{
 		NONE,
 		L1,
@@ -17,13 +16,12 @@ public abstract class Optimizer {
 		this.lr = lr;
 		this.mode = GMode.NONE;
 	}
-
 	
-	public Optimizer(double lr,double lamda,GMode mode,int numOfTrainData){
+	
+	public Optimizer(double lr,GMode mode,double lamda){
 		this.lr = lr;
 		this.lamda = lamda;
 		this.mode = mode;
-		this.numOfTrainData = numOfTrainData;
 	}
 	public abstract void updateW(List<Blob> params,List<Blob> gradient);
 	public abstract void updateB(List<Blob> params,List<Blob> gradient);
