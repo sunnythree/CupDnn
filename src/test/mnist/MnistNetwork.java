@@ -25,6 +25,7 @@ import cupcnn.layer.PoolMeanLayer;
 import cupcnn.layer.SoftMaxLayer;
 import cupcnn.loss.CrossEntropyLoss;
 import cupcnn.loss.LogLikeHoodLoss;
+import cupcnn.loss.MSELoss;
 import cupcnn.optimizer.Optimizer;
 import cupcnn.optimizer.SGDMOptimizer;
 import cupcnn.optimizer.SGDOptimizer;
@@ -37,14 +38,16 @@ public class MnistNetwork {
 		InputLayer layer1 = new InputLayer(network,28,28,1);
 		network.addLayer(layer1);
 		FullConnectionLayer layer2 = new FullConnectionLayer(network,28*28,100);
-		layer2.setActivationFunc(new SigmodActivationFunc());
+		layer2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(layer2);
 		FullConnectionLayer layer3 = new FullConnectionLayer(network,100,30);
-		layer3.setActivationFunc(new SigmodActivationFunc());
+		layer3.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(layer3);
 		FullConnectionLayer layer4 = new FullConnectionLayer(network,30,10);
-		layer4.setActivationFunc(new SigmodActivationFunc());
+		layer4.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(layer4);
+		SoftMaxLayer sflayer = new SoftMaxLayer(network,10);
+		network.addLayer(sflayer);
 	}
 	
 	private void buildConvNetwork(){
@@ -58,15 +61,15 @@ public class MnistNetwork {
 		PoolMaxLayer pool1 = new PoolMaxLayer(network,28,28,6,2,2);
 		network.addLayer(pool1);
 		
-		Conv2dLayer conv2 = new Conv2dLayer(network,14,14,6,36,3,1);
+		Conv2dLayer conv2 = new Conv2dLayer(network,14,14,6,10,3,1);
 		conv2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(conv2);
 		
-		PoolMeanLayer pool2 = new PoolMeanLayer(network,14,14,36,2,2);
+		PoolMeanLayer pool2 = new PoolMeanLayer(network,14,14,10,2,2);
 		network.addLayer(pool2);
 		
 		
-		FullConnectionLayer fc1 = new FullConnectionLayer(network,7*7*36,500);
+		FullConnectionLayer fc1 = new FullConnectionLayer(network,7*7*10,500);
 		fc1.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(fc1);
 		
@@ -83,10 +86,11 @@ public class MnistNetwork {
 		//首先构建神经网络对象，并设置参数
 		network = new Network();
 		network.setThreadNum(8);
-		network.setBatch(50);
-		//network.setLoss(new LogLikeHoodLoss());
-		network.setLoss(new CrossEntropyLoss());
-		optimizer = new SGDOptimizer(1f);
+		network.setBatch(100);
+		network.setLoss(new LogLikeHoodLoss());
+		//network.setLoss(new CrossEntropyLoss());
+		//network.setLoss(new MSELoss());
+		optimizer = new SGDOptimizer(3f);
 		network.setOptimizer(optimizer);
 		
 		buildFcNetwork();

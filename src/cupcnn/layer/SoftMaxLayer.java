@@ -50,7 +50,7 @@ public class SoftMaxLayer extends Layer{
 		assert input.getSize()==output.getSize():"SoftMax forward---- input.getSize()==output.getSize() error";
 	
 		Vector<Task<Object>> workers = new Vector<Task<Object>>();
-		for(int n=0;n<input.getNumbers();n++){
+		for(int n=0;n<mNetwork.getBatch();n++){
 			workers.add(new Task<Object>(n) {
 				@Override
 			    public Object call() throws Exception {
@@ -58,21 +58,21 @@ public class SoftMaxLayer extends Layer{
 					float max = 0.001f;
 					
 					//查找最大值
-					for(int is=0;is<input.get3DSize();is++){
-						max = Math.max(max, inputData[n*input.get3DSize()+is]);
+					for(int is=0;is<input.getWidth();is++){
+						max = Math.max(max, inputData[n*input.getWidth()+is]);
 					}
 					//求和
-					for(int is=0;is<input.get3DSize();is++){
-						outputData[n*input.get3DSize()+is] = (float) Math.exp(inputData[n*input.get3DSize()+is]-max);
-						sum += outputData[n*input.get3DSize()+is];
+					for(int is=0;is<input.getWidth();is++){
+						outputData[n*input.getWidth()+is] = (float) Math.exp(inputData[n*input.getWidth()+is]-max);
+						sum += outputData[n*input.getWidth()+is];
 					}
 					if(sum==0){
 						System.out.println("sum is zero");
 						System.exit(0);
 					}
 					//每一项除以sum
-					for(int os=0;os<output.get3DSize();os++){
-						outputData[n*output.get3DSize()+os] /= sum;
+					for(int os=0;os<output.getWidth();os++){
+						outputData[n*output.getWidth()+os] /= sum;
 					}
 					
 //					//求和
@@ -104,18 +104,18 @@ public class SoftMaxLayer extends Layer{
 		//先求softmax函数的偏导数
 		outputDiff.fillValue(0);
 		Vector<Task<Object>> workers = new Vector<Task<Object>>();
-		for(int n=0;n<inputDiff.getNumbers();n++){
+		for(int n=0;n<mNetwork.getBatch();n++){
 			workers.add(new Task<Object>(n) {
 				@Override
 			    public Object call() throws Exception {
-					for(int ods=0;ods<outputDiff.get3DSize();ods++){
-						for(int ids=0;ids<inputDiff.get3DSize();ids++){
+					for(int ods=0;ods<outputDiff.getWidth();ods++){
+						for(int ids=0;ids<inputDiff.getWidth();ids++){
 							if(ids==ods){
-								outputDiffData[n*output.get3DSize()+ods] += outputData[n*output.get3DSize()+ods]*(1.0-outputData[n*output.get3DSize()+ods])
-										*inputDiffData[n*output.get3DSize()+ids];
+								outputDiffData[n*output.getWidth()+ods] += outputData[n*output.getWidth()+ods]*(1.0-outputData[n*output.getWidth()+ods])
+										*inputDiffData[n*output.getWidth()+ids];
 							}else{
-								outputDiffData[n*output.get3DSize()+ods] -= outputData[n*output.get3DSize()+ods]*outputData[n*output.get3DSize()+ids]
-										*inputDiffData[n*output.get3DSize()+ids];
+								outputDiffData[n*output.getWidth()+ods] -= outputData[n*output.getWidth()+ods]*outputData[n*output.getWidth()+ids]
+										*inputDiffData[n*output.getWidth()+ids];
 							}
 						}
 					}
@@ -152,13 +152,13 @@ public class SoftMaxLayer extends Layer{
 	@Override
 	public Blob createOutBlob() {
 		// TODO Auto-generated method stub
-		return new Blob(mNetwork.getBatch(),size,1,1);
+		return new Blob(mNetwork.getBatch(),size);
 	}
 
 	@Override
 	public Blob createDiffBlob() {
 		// TODO Auto-generated method stub
-		return new Blob(mNetwork.getBatch(),size,1,1);
+		return new Blob(mNetwork.getBatch(),size);
 	}
 
 }

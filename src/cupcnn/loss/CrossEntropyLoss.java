@@ -24,13 +24,15 @@ public class CrossEntropyLoss extends Loss {
 		float[] labelData = label.getData();
 		float[] outputData = output.getData();
 		float[] diffData = diff.getData();
+		int height = label.getHeight();
+		int width = label.getWidth();
 		diff.fillValue(0.0f);
 		assert diffData.length == outputData.length:"CrossEntropyLoss diff --- diffData.length == outputData.length error";
 		assert labelData.length == outputData.length:"CrossEntropyLoss diff --- labelData.length == outputData.length error";
-		for(int n=0;n<output.getHeight();n++){
+		for(int n=0;n<height;n++){
 			for(int os=0;os<output.getWidth();os++){
-				diffData[n*diff.getWidth()+os] -= (labelData[n*label.getWidth()+os]/outputData[n*output.getWidth()+os]
-						-(1-labelData[n*label.getWidth()+os])/(1-outputData[n*output.getWidth()+os]));
+				diffData[n*width+os] -= (labelData[n*width+os]/outputData[n*width+os]
+						-(1-labelData[n*width+os])/(1-outputData[n*width+os]))/(float)height;
 			}
 		}
 	}
