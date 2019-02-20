@@ -3,7 +3,7 @@ package test.mnist;
 import java.io.IOException;
 import java.util.List;
 
-import test.mnist.DigitImage;
+import cupcnn.util.DigitImage;
 import test.mnist.MnistNetwork;
 import test.mnist.ReadFile;
 
@@ -28,7 +28,8 @@ public class MnistTest {
 		
 		MnistNetwork mn = new MnistNetwork();
 		mn.buildNetwork(trains.size());
-		mn.train(trains,1,tests);
+		mn.train(trains,30,tests);
+
 		mn.saveModel("model/mnist.model");
 		
 		

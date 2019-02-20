@@ -4,33 +4,31 @@ import java.util.List;
 import cupcnn.data.Blob;
 
 public abstract class Optimizer {
-	protected double lr = 0.0;
-	protected double lamda = 0.0;
-	protected int numOfTrainData = 0;
+	protected float lr = 0.0f;
+	protected float lamda = 0.0f;
 	public static enum GMode{
 		NONE,
 		L1,
 		L2
 	}
 	GMode mode;
-	public Optimizer(double lr){
+	public Optimizer(float lr){
 		this.lr = lr;
 		this.mode = GMode.NONE;
 	}
-
 	
-	public Optimizer(double lr,double lamda,GMode mode,int numOfTrainData){
+	
+	public Optimizer(float lr,GMode mode,float lamda){
 		this.lr = lr;
 		this.lamda = lamda;
 		this.mode = mode;
-		this.numOfTrainData = numOfTrainData;
 	}
 	public abstract void updateW(List<Blob> params,List<Blob> gradient);
 	public abstract void updateB(List<Blob> params,List<Blob> gradient);
-	public void setLr(double lr){
+	public void setLr(float lr){
 		this.lr = lr;
 	}
-	public double getLr(){
+	public float getLr(){
 		return this.lr;
 	}
 

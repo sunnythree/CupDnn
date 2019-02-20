@@ -2,7 +2,7 @@ package cupcnn.loss;
 
 import cupcnn.data.Blob;
 
-public class LogLikeHoodLoss extends Loss{
+public class MSELoss extends Loss{
 
 	@Override
 	public float loss(Blob label, Blob output) {
@@ -10,15 +10,11 @@ public class LogLikeHoodLoss extends Loss{
 		float[] labelData = label.getData();
 		float[] outputData = output.getData();
 		float loss = 0.0f;
-		int width = label.getWidth();
-		int height = label.getHeight();
-		for(int n=0;n<label.getHeight();n++){
-			for(int i=0;i<label.getWidth();i++){
-				loss -= labelData[n*width+i]*Math.log(outputData[n*width+i]);
-			}
-		}
-		loss = loss/height;
-		return loss;
+	    for (int i = 0; i < label.getSize(); ++i) {
+	    	loss += (labelData[i] - outputData[i]) * (labelData[i] - outputData[i]);
+	    } 
+
+	    return loss /label.getHeight();
 	}
 
 	@Override
@@ -29,12 +25,11 @@ public class LogLikeHoodLoss extends Loss{
 		float[] diffData = diff.getData();
 		int width = label.getWidth();
 		int height = label.getHeight();
+		float factor = 2;
 		diff.fillValue(0.0f);
-		assert diffData.length == outputData.length:"LogLikeHoodLoss diff --- diffData.length == outputData.length error";
-		assert labelData.length == outputData.length:"LogLikeHoodLoss diff --- labelData.length == outputData.length error";
 		for(int n=0;n<height;n++){
 			for(int os=0;os<width;os++){
-				diffData[n*width+os] -= labelData[n*width+os]/outputData[n*width+os]/(float)height;
+				diffData[n*width+os] += factor*(outputData[n*width+os]-labelData[n*width+os]);
 			}
 		}
 	}

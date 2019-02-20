@@ -4,18 +4,18 @@ public class SigmodActivationFunc extends ActivationFunc {
 	public static final String TYPE = "SigmodActivationFunc";
 	
 	@Override
-	public double active(double in) {
+	public float active(float in) {
 		// TODO Auto-generated method stub
-		double result = 0;
-		result = 1.0/(1.0+Math.exp(-in));
+		float result = 0;
+		result = 1.0f/(1.0f+(float)Math.exp(-in));
 		return result;
 	}
 
 	@Override
-	public double diffActive(double in) {
+	public float diffActive(float in) {
 		// TODO Auto-generated method stub
-		double result = 0.0;
-		result = (Math.exp(-in))/((1+Math.exp(-in))*(1+Math.exp(-in)));
+		float result = 0.0f;
+		result = (float) ((Math.exp(-in))/((1+Math.exp(-in))*(1+Math.exp(-in))));
 		return result;
 	}
 	
