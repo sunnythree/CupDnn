@@ -72,7 +72,7 @@ public class SoftMaxLayer extends Layer{
 					}
 					//每一项除以sum
 					for(int os=0;os<output.get3DSize();os++){
-						outputData[n*output.get3DSize()+os] = outputData[n*output.get3DSize()+os]/sum;
+						outputData[n*output.get3DSize()+os] /= sum;
 					}
 					
 //					//求和

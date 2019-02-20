@@ -36,13 +36,13 @@ public class MnistNetwork {
 		//给network添加网络层
 		InputLayer layer1 = new InputLayer(network,28,28,1);
 		network.addLayer(layer1);
-		FullConnectionLayer layer2 = new FullConnectionLayer(network,28*28,1000);
+		FullConnectionLayer layer2 = new FullConnectionLayer(network,28*28,600);
 		layer2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(layer2);
-		FullConnectionLayer layer3 = new FullConnectionLayer(network,1000,100);
+		FullConnectionLayer layer3 = new FullConnectionLayer(network,600,60);
 		layer3.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(layer3);
-		FullConnectionLayer layer4 = new FullConnectionLayer(network,100,10);
+		FullConnectionLayer layer4 = new FullConnectionLayer(network,60,10);
 		layer4.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(layer4);
 		SoftMaxLayer sflayer = new SoftMaxLayer(network,10);
@@ -87,15 +87,15 @@ public class MnistNetwork {
 	public void buildNetwork(int numOfTrainData){
 		//首先构建神经网络对象，并设置参数
 		network = new Network();
-		network.setThreadNum(6);
+		network.setThreadNum(8);
 		network.setBatch(100);
 		network.setLoss(new LogLikeHoodLoss());
 		//network.setLoss(new CrossEntropyLoss());
 		optimizer = new SGDOptimizer(0.1f);
 		network.setOptimizer(optimizer);
 		
-		buildFcNetwork();
-		//buildConvNetwork();
+		//buildFcNetwork();
+		buildConvNetwork();
 
 		network.prepare();
 	}
@@ -195,8 +195,8 @@ public class MnistNetwork {
 		
 			test(testLists);
 			
-			if(loclaLr>0.00001){
-				loclaLr*=0.8;
+			if(loclaLr>0.00001f){
+				loclaLr*=0.8f;
 				optimizer.setLr(loclaLr);
 			}
 		}

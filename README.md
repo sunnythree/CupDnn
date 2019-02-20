@@ -76,7 +76,6 @@ mnist test is offered(2017).<br />
 cifar10 test is offered(2018-12-23).
 
 ## Performance
-The accuracy rate is about 99% in mnist dateset with cnn.<br />
 
 ##License
 BSD 2-Clause
