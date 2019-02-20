@@ -1,7 +1,7 @@
 package cupcnn.active;
 
 public abstract class ActivationFunc {
-	public abstract double active(double in);
-	public abstract double diffActive(double in);
+	public abstract float active(float in);
+	public abstract float diffActive(float in);
 	public abstract String getType();
 }

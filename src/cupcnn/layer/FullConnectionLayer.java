@@ -49,12 +49,12 @@ public class FullConnectionLayer extends Layer{
 
 
 			//初始化
-			double[] wData = w.getData();
-			double[] bData = b.getData();
+			float[] wData = w.getData();
+			float[] bData = b.getData();
 			//高斯分布初始化w
 			MathFunctions.gaussianInitData(wData);
 			//常量初始化b
-			MathFunctions.constantInitData(bData, 0.1);
+			MathFunctions.constantInitData(bData, 0.1f);
 		}
 		assert w!=null && b!=null:"FullConnectionLayer prepare---w or b is null error";
 		wGradient = new Blob(w.getNumbers(),w.getChannels(),1,1);
@@ -68,11 +68,11 @@ public class FullConnectionLayer extends Layer{
 		// TODO Auto-generated method stub
 		Blob input = mNetwork.getDatas().get(id-1);
 		Blob output = mNetwork.getDatas().get(id);
-		double[] inputData = input.getData();
-		double[] outputData = output.getData();
-		double[] wData = w.getData();
-		double[] bData = b.getData();
-		double[] zData = z.getData();
+		float[] inputData = input.getData();
+		float[] outputData = output.getData();
+		float[] wData = w.getData();
+		float[] bData = b.getData();
+		float[] zData = z.getData();
 		z.fillValue(0);
 		Vector<Task<Object>> workers = new Vector<Task<Object>>();
 		for(int n=0;n<input.getNumbers();n++){
@@ -105,13 +105,13 @@ public class FullConnectionLayer extends Layer{
 		Blob inputDiff = mNetwork.getDiffs().get(id);
 		Blob outputDiff = mNetwork.getDiffs().get(id-1);
 		Blob input = mNetwork.getDatas().get(id-1);
-		double[] inputData = input.getData();
-		double[] inputDiffData = inputDiff.getData();
-		double[] outputDiffData = outputDiff.getData();
-		double[] wData = w.getData();
-		double[] wGradientData = wGradient.getData();
-		double[] bGradientData = bGradient.getData();
-		double[] zData = z.getData();
+		float[] inputData = input.getData();
+		float[] inputDiffData = inputDiff.getData();
+		float[] outputDiffData = outputDiff.getData();
+		float[] wData = w.getData();
+		float[] wGradientData = wGradient.getData();
+		float[] bGradientData = bGradient.getData();
+		float[] zData = z.getData();
 		
 		//update diff
 		//先乘激活函数的偏导数,即可求出当前层的误差

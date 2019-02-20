@@ -13,14 +13,14 @@ import cupcnn.data.Blob;
 
 public class MathFunctions {
 	
-	public static void gaussianInitData(double[] data){
+	public static void gaussianInitData(float[] data){
 		Random random = new Random();
 		for(int i=0;i<data.length;i++){
-			data[i] = random.nextGaussian()*0.1;
+			data[i] = (float) (random.nextGaussian()*0.1);
 		}
 	}
 	
-	public static void constantInitData(double[] data,double value){
+	public static void constantInitData(float[] data,float value){
 		for(int i=0;i<data.length;i++){
 			data[i] = value;
 		}
@@ -33,17 +33,17 @@ public class MathFunctions {
 		}
 	}
 	
-	public static void dataDivConstant(double[] data,double constant){
+	public static void dataDivConstant(float[] data,float constant){
 		for(int i=0; i<data.length;i++){
 			data[i] /= constant;
 		}
 	}
 	
 	public static void deepWiseConv2dSame(Network network,Blob input,Blob kernel,Blob bias,Blob output){
-		double[] inputData = input.getData();
-		double[] kernelData = kernel.getData();
-		double[] outputData = output.getData();
-		double[] biasData = bias.getData();
+		float[] inputData = input.getData();
+		float[] kernelData = kernel.getData();
+		float[] outputData = output.getData();
+		float[] biasData = bias.getData();
 		
 		int features = output.getChannels()/input.getChannels();
 		Vector<Task<Object>> workers = new Vector<Task<Object>>();
@@ -85,9 +85,9 @@ public class MathFunctions {
 	}
 
 	public static void deepWiseConv2dSame(Network network,Blob input,Blob kernel,Blob output){
-		double[] inputData = input.getData();
-		double[] kernelData = kernel.getData();
-		double[] outputData = output.getData();
+		float[] inputData = input.getData();
+		float[] kernelData = kernel.getData();
+		float[] outputData = output.getData();
 		
 		int features = input.getChannels()/output.getChannels();
 		Vector<Task<Object>> workers = new Vector<Task<Object>>();
@@ -124,10 +124,10 @@ public class MathFunctions {
 	}
 	
 	public static void conv2dBlobSame(Network network,Blob input,Blob kernel,Blob bias,Blob output){
-		double[] inputData = input.getData();
-		double[] kernelData = kernel.getData();
-		double[] outputData = output.getData();
-		double[] biasData = bias.getData();
+		float[] inputData = input.getData();
+		float[] kernelData = kernel.getData();
+		float[] outputData = output.getData();
+		float[] biasData = bias.getData();
 		Vector<Task<Object>> workers = new Vector<Task<Object>>();
 		for(int n=0;n<output.getNumbers();n++){
 			workers.add(new Task<Object>(n) {
@@ -170,9 +170,9 @@ public class MathFunctions {
 	}
 	
 	public static void conv2dBlobSame(Network network,Blob input,Blob kernel,Blob output){
-		double[] inputData = input.getData();
-		double[] kernelData = kernel.getData();
-		double[] outputData = output.getData();
+		float[] inputData = input.getData();
+		float[] kernelData = kernel.getData();
+		float[] outputData = output.getData();
 		Vector<Task<Object>> workers = new Vector<Task<Object>>();
 		for(int n=0;n<input.getNumbers();n++){
 			workers.add(new Task<Object>(n) {
@@ -209,8 +209,8 @@ public class MathFunctions {
 	
 	public static Blob rotate180Blob(Blob input){
 		Blob output = new Blob(input.getNumbers(),input.getChannels(),input.getHeight(),input.getWidth());
-		double[] inputData = input.getData();
-		double[] outputData = output.getData();
+		float[] inputData = input.getData();
+		float[] outputData = output.getData();
 		/*
 		 * 旋转180度就是上下颠倒，同时左右镜像
 		 */

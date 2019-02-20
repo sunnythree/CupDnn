@@ -10,7 +10,7 @@ public class Blob implements Serializable{
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private double[] data;
+	private float[] data;
 	private int numbers;
 	private int channels;
 	private int width;
@@ -22,7 +22,7 @@ public class Blob implements Serializable{
 		this.channels = b.channels;
 		this.height = b.height;
 		this.width = b.width;
-		data = new double[getSize()];	
+		data = new float[getSize()];	
 		if(copy) {
 			for(int i=0;i<data.length;i++) {
 				data[i]=b.getData()[i];
@@ -39,7 +39,7 @@ public class Blob implements Serializable{
 		this.channels = channels;
 		this.height = height;
 		this.width = width;
-		data = new double[getSize()];
+		data = new float[getSize()];
 	}
 
 	
@@ -92,11 +92,11 @@ public class Blob implements Serializable{
 		return id;
 	}
 	
-	public double[] getData(){
+	public float[] getData(){
 		return data;
 	}
 	
-	public void fillValue(double value){
+	public void fillValue(float value){
 		for(int i=0;i<data.length;i++){
 			data[i] = value;
 		}
@@ -107,7 +107,7 @@ public class Blob implements Serializable{
 		to.channels = this.channels;
 		to.height = this.height;
 		to.width = this.width;
-		double[] toData = to.getData();
+		float[] toData = to.getData();
 		for(int i=0;i<data.length;i++){
 			toData[i] = this.data[i];
 		}

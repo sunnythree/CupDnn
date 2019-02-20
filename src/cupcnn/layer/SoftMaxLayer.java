@@ -45,8 +45,8 @@ public class SoftMaxLayer extends Layer{
 		// TODO Auto-generated method stub
 		Blob input = mNetwork.getDatas().get(id-1);
 		Blob output = mNetwork.getDatas().get(id);
-		double[] inputData = input.getData();
-		double[] outputData = output.getData();
+		float[] inputData = input.getData();
+		float[] outputData = output.getData();
 		assert input.getSize()==output.getSize():"SoftMax forward---- input.getSize()==output.getSize() error";
 	
 		Vector<Task<Object>> workers = new Vector<Task<Object>>();
@@ -54,8 +54,8 @@ public class SoftMaxLayer extends Layer{
 			workers.add(new Task<Object>(n) {
 				@Override
 			    public Object call() throws Exception {
-					double sum = 0.0;
-					double max = 0.01;
+					float sum = 0.0f;
+					float max = 0.001f;
 					
 					//查找最大值
 					for(int is=0;is<input.get3DSize();is++){
@@ -63,7 +63,7 @@ public class SoftMaxLayer extends Layer{
 					}
 					//求和
 					for(int is=0;is<input.get3DSize();is++){
-						outputData[n*input.get3DSize()+is] = Math.exp(inputData[n*input.get3DSize()+is]-max);
+						outputData[n*input.get3DSize()+is] = (float) Math.exp(inputData[n*input.get3DSize()+is]-max);
 						sum += outputData[n*input.get3DSize()+is];
 					}
 					if(sum==0){
@@ -96,9 +96,9 @@ public class SoftMaxLayer extends Layer{
 		Blob inputDiff = mNetwork.getDiffs().get(id);
 		Blob outputDiff = mNetwork.getDiffs().get(id-1);
 		Blob output = mNetwork.getDatas().get(id);
-		double[] inputDiffData = inputDiff.getData();
-		double[] outputDiffData = outputDiff.getData();
-		double[] outputData = output.getData();
+		float[] inputDiffData = inputDiff.getData();
+		float[] outputDiffData = outputDiff.getData();
+		float[] outputData = output.getData();
 		assert inputDiff.getSize()==outputDiff.getSize():"SoftMax backward---- inputDiff.getSize()==outputDiff.getSize() error";
 		
 		//先求softmax函数的偏导数

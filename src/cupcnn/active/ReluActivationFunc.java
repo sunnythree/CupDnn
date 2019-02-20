@@ -4,16 +4,16 @@ public class ReluActivationFunc extends ActivationFunc {
 	public static final String TYPE = "ReluActivationFunc";
 	
 	@Override
-	public double active(double in) {
+	public float active(float in) {
 		// TODO Auto-generated method stub
-		double result = in > 0 ? in:0;
+		float result = in > 0 ? in:0;
 		return result;
 	}
 
 	@Override
-	public double diffActive(double in) {
+	public float diffActive(float in) {
 		// TODO Auto-generated method stub
-		double result = in<=0 ? 0.1:1.0;
+		float result = in<=0 ? 0.01f:1.0f;
 		return result;
 	}
 	

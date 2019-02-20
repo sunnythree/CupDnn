@@ -36,13 +36,13 @@ public class MnistNetwork {
 		//¸ønetworkÌí¼ÓÍøÂç²ã
 		InputLayer layer1 = new InputLayer(network,28,28,1);
 		network.addLayer(layer1);
-		FullConnectionLayer layer2 = new FullConnectionLayer(network,28*28,300);
+		FullConnectionLayer layer2 = new FullConnectionLayer(network,28*28,1000);
 		layer2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(layer2);
-		FullConnectionLayer layer3 = new FullConnectionLayer(network,300,50);
+		FullConnectionLayer layer3 = new FullConnectionLayer(network,1000,100);
 		layer3.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(layer3);
-		FullConnectionLayer layer4 = new FullConnectionLayer(network,50,10);
+		FullConnectionLayer layer4 = new FullConnectionLayer(network,100,10);
 		layer4.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(layer4);
 		SoftMaxLayer sflayer = new SoftMaxLayer(network,10);
@@ -91,7 +91,7 @@ public class MnistNetwork {
 		network.setBatch(100);
 		network.setLoss(new LogLikeHoodLoss());
 		//network.setLoss(new CrossEntropyLoss());
-		optimizer = new SGDOptimizer(0.1,Optimizer.GMode.L2,0.001);
+		optimizer = new SGDOptimizer(0.1f);
 		network.setOptimizer(optimizer);
 		
 		buildFcNetwork();
@@ -104,14 +104,14 @@ public class MnistNetwork {
 		Blob input = new Blob(batch,channel,height,width);
 		Blob label = new Blob(batch,network.getDatas().get(network.getDatas().size()-1).get3DSize(),1,1);
 		label.fillValue(0);
-		double[] blobData = input.getData();
-		double[] labelData = label.getData();
+		float[] blobData = input.getData();
+		float[] labelData = label.getData();
 		for(int i=start;i<(batch+start);i++){
 			DigitImage img = imageList.get(i);
 			byte[] imgData = img.imageData;
 			assert img.imageData.length== input.get3DSize():"buildBlobByImageList -- blob size error";
 			for(int j=0;j<imgData.length;j++){
-				blobData[(i-start)*input.get3DSize()+j] = (imgData[j]&0xff)/128.0-1;//normalize and centerlize(-1,1)
+				blobData[(i-start)*input.get3DSize()+j] = (imgData[j]&0xff)/128.0f-1;//normalize and centerlize(-1,1)
 			}
 			int labelValue = img.label;
 			for(int j=0;j<label.get3DSize();j++){
@@ -138,7 +138,7 @@ public class MnistNetwork {
 		return maxIndex;
 	}
 	
-	private int[] getBatchOutputLabel(double[] data){
+	private int[] getBatchOutputLabel(float[] data){
 		int[] outLabels = new int[network.getDatas().get(network.getDatas().size()-1).getNumbers()];
 		int outDataSize = network.getDatas().get(network.getDatas().size()-1).get3DSize();
 		for(int n=0;n<outLabels.length;n++){
@@ -174,15 +174,15 @@ public class MnistNetwork {
 	public void train(List<DigitImage> trainLists,int epoes,List<DigitImage> testLists){
 		System.out.println("training...... please wait for a moment!");
 		int batch = network.getBatch();
-		double loclaLr = optimizer.getLr();
-		double lossValue = 0;
+		float loclaLr = optimizer.getLr();
+		float lossValue = 0;
 		
 		for(int e=0;e<epoes;e++){
 			Collections.shuffle(trainLists);
 			long start = System.currentTimeMillis();
 			for(int i=0;i<=trainLists.size()-batch;i+=batch){
 				List<Blob> inputAndLabel = buildBlobByImageList(trainLists,i,batch,1,28,28);
-				double tmpLoss = network.train(inputAndLabel.get(0), inputAndLabel.get(1));
+				float tmpLoss = network.train(inputAndLabel.get(0), inputAndLabel.get(1));
 				lossValue = (lossValue+tmpLoss)/2;
 				if(i%1000==0) {
 					System.out.print(".");
@@ -195,7 +195,7 @@ public class MnistNetwork {
 		
 			test(testLists);
 			
-			if(loclaLr>0.001){
+			if(loclaLr>0.00001){
 				loclaLr*=0.8;
 				optimizer.setLr(loclaLr);
 			}

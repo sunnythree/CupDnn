@@ -53,8 +53,8 @@ public class PoolMeanLayer extends Layer{
 		// TODO Auto-generated method stub
 		Blob input = mNetwork.getDatas().get(id-1);
 		Blob output = mNetwork.getDatas().get(id);
-		double [] outputData = output.getData();
-		double [] inputData = input.getData();
+		float [] outputData = output.getData();
+		float [] inputData = input.getData();
 		Vector<Task<Object>> workers = new Vector<Task<Object>>();
 		for(int n=0;n<output.getNumbers();n++){
 			workers.add(new Task<Object>(n) {
@@ -65,7 +65,7 @@ public class PoolMeanLayer extends Layer{
 							for(int w=0;w<output.getWidth();w++){
 								int inStartX = w*stride;
 								int inStartY = h*stride;
-								double sum = 0;
+								float sum = 0;
 								for(int kh=0;kh<kernelSize;kh++){
 									for(int kw=0;kw<kernelSize;kw++){
 										int curIndex = input.getIndexByParams(n, c, inStartY+kh, inStartX+kw);
@@ -88,8 +88,8 @@ public class PoolMeanLayer extends Layer{
 		// TODO Auto-generated method stub
 		Blob inputDiff = mNetwork.getDiffs().get(id);
 		Blob outputDiff = mNetwork.getDiffs().get(id-1);
-		double[] inputDiffData = inputDiff.getData();
-		double[] outputDiffData = outputDiff.getData();
+		float[] inputDiffData = inputDiff.getData();
+		float[] outputDiffData = outputDiff.getData();
 		Vector<Task<Object>> workers = new Vector<Task<Object>>();
 		for(int n=0;n<inputDiff.getNumbers();n++){
 			workers.add(new Task<Object>(n) {

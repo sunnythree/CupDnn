@@ -10,16 +10,19 @@ import cupcnn.optimizer.Optimizer.GMode;
  */
 public class SGDMOptimizer extends Optimizer {
 	
-	private double momentum = 0.9f;
+	private float momentum = 0.9f;
 	private HashMap<Blob,Blob> privMap = new HashMap();
 	
-	public SGDMOptimizer(double lr,double mententum){
+	public SGDMOptimizer(float lr,float mententum){
 		super(lr);
 		this.momentum = mententum;
 	}
 
+	/*
+	 * lamda是衰减权重，是一个很小的数字
+	 * */
 	
-	public SGDMOptimizer(double lr,Optimizer.GMode mode,double lamda,double mententum){
+	public SGDMOptimizer(float lr,Optimizer.GMode mode,float lamda,float mententum){
 		super(lr,mode,lamda);
 		this.momentum = mententum;
 	}
@@ -37,16 +40,16 @@ public class SGDMOptimizer extends Optimizer {
 			assert priv.getSize()==params.get(0).getSize():"momentum size error";
 		}
 		
-		double[] privData = priv.getData();
+		float[] privData = priv.getData();
 		
 		for(int i=0;i<params.size();i++){
 			Blob param = params.get(i);
 			Blob grad = gradient.get(i);
-			double[] paramData = param.getData();
-			double[] gradData = grad.getData();
+			float[] paramData = param.getData();
+			float[] gradData = grad.getData();
 			assert param.getSize()==grad.getSize():"param data size not equal gradient data size";
 			for(int j=0;j<param.getSize();j++){
-				double V = momentum*privData[j]-lr*gradData[j];
+				float V = momentum*privData[j]-lr*gradData[j];
 				paramData[j] += V;
 				privData[j] = V;
 			}
@@ -64,24 +67,24 @@ public class SGDMOptimizer extends Optimizer {
 		}else {
 			assert priv.getSize()==params.get(0).getSize():"momentum size error";
 		}
-		double[] privData = priv.getData();
+		float[] privData = priv.getData();
 		for(int i=0;i<params.size();i++){
 			Blob param = params.get(i);
 			Blob grad = gradient.get(i);
-			double[] paramData = param.getData();
-			double[] gradData = grad.getData();
+			float[] paramData = param.getData();
+			float[] gradData = grad.getData();
 			assert param.getSize()==grad.getSize():"param data size not equal gradient data size";
 			if(mode==GMode.L2) {
 				for(int j=0;j<param.getSize();j++){
 					//添加l2衰减
-					double V = momentum*privData[j]-lr*lamda*paramData[j]  - lr*gradData[j];
+					float V = momentum*privData[j]-lr*lamda*paramData[j]  - lr*gradData[j];
 					paramData[j] += V;
 					privData[j] = V;
 				}
 			}else if(mode==GMode.L1){
 				for(int j=0;j<param.getSize();j++){
 					//添加l1衰减
-					double V = 0;
+					float V = 0;
 					if(paramData[j]>=0) {
 						V = momentum*privData[j] - lr*lamda  - lr*gradData[j];
 					}else {
@@ -92,7 +95,7 @@ public class SGDMOptimizer extends Optimizer {
 				}				
 			}else {
 				for(int j=0;j<param.getSize();j++){
-					double V = momentum*privData[j]-lr*gradData[j];
+					float V = momentum*privData[j]-lr*gradData[j];
 					paramData[j] += V;
 					privData[j] = V;
 				}

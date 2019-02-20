@@ -124,8 +124,8 @@ public class Network{
 		}
 	}
 	
-	public double  train(Blob inputData,Blob labelData){
-		double lossValue = 0.0;
+	public float  train(Blob inputData,Blob labelData){
+		float lossValue = 0.0f;
 		Layer first = layers.get(0);
 		assert first instanceof InputLayer:"input layer error";
 		((InputLayer)first).setInputData(inputData);

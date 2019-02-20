@@ -66,7 +66,7 @@ public class Conv2dLayer extends Layer{
 			bias = new Blob(mNetwork.getBatch(),outChannel,1,1);
 			//init params
 			MathFunctions.gaussianInitData(kernel.getData());
-			MathFunctions.constantInitData(bias.getData(), 0.1);
+			MathFunctions.constantInitData(bias.getData(), 0.1f);
 		}
 		assert kernel != null && bias != null :"ConvolutionLayer prepare----- kernel is null or bias is null error";
 		z = new Blob(output.getNumbers(),output.getChannels(),output.getHeight(),output.getWidth());
@@ -80,8 +80,8 @@ public class Conv2dLayer extends Layer{
 		// TODO Auto-generated method stub
 		Blob input = mNetwork.getDatas().get(id-1);
 		Blob output = mNetwork.getDatas().get(id);
-		double [] outputData = output.getData();
-		double [] zData = z.getData();
+		float [] outputData = output.getData();
+		float [] zData = z.getData();
 		//卷积后的结果存贮在z中
 		z.fillValue(0);
 		MathFunctions.conv2dBlobSame(mNetwork,input, kernel, bias, z);
@@ -113,11 +113,11 @@ public class Conv2dLayer extends Layer{
 		Blob input = mNetwork.getDatas().get(id-1);
 		Blob inputDiff = mNetwork.getDiffs().get(id);
 		Blob outputDiff = mNetwork.getDiffs().get(id-1);
-		double[] inputDiffData = inputDiff.getData();
-		double[] zData = z.getData();
-		double[] kernelGradientData = kernelGradient.getData();
-		double[] inputData = input.getData();
-		double[] biasGradientData = biasGradient.getData();
+		float[] inputDiffData = inputDiff.getData();
+		float[] zData = z.getData();
+		float[] kernelGradientData = kernelGradient.getData();
+		float[] inputData = input.getData();
+		float[] biasGradientData = biasGradient.getData();
 		
 		//先乘激活函数的导数,得到该层的误差
 		Vector<Task<Object>> workers = new Vector<Task<Object>>();
