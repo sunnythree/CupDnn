@@ -101,4 +101,14 @@ public class InputLayer extends Layer{
 		// TODO Auto-generated method stub
 		return new Blob(mNetwork.getBatch(),channel,height,width);
 	}
+	
+	public int getWidth() {
+		return width;
+	}
+	public int getHeight() {
+		return height;
+	}
+	public int getChannel() {
+		return channel;
+	}
 }

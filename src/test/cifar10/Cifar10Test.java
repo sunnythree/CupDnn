@@ -3,7 +3,8 @@ package test.cifar10;
 
 import java.io.IOException;
 import java.util.List;
-import test.cifar10.DigitImage;
+
+import cupcnn.util.DigitImage;
 import test.cifar10.Cifar10Network;
 import test.cifar10.ReadFile;
 
@@ -27,7 +28,7 @@ import test.cifar10.ReadFile;
 		
 		Cifar10Network mn = new Cifar10Network();
 		mn.buildNetwork(trains.size());
-		mn.train(trains,5,tests);
+		mn.train(trains,10,tests);
 		//mn.test(tests);
 		mn.saveModel("model/cifar10.model");
 		
