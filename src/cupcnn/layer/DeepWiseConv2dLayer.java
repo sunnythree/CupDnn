@@ -63,16 +63,16 @@ public class DeepWiseConv2dLayer extends Layer{
 		Blob output = mNetwork.getDatas().get(id);
 		//layerParams.getHeight()表示该层需要提取的特征数量
 		if(kernel ==null && bias == null){
-			kernel = new Blob(mNetwork.getBatch(),outChannel,kernelSize,kernelSize);
-			bias = new Blob(mNetwork.getBatch(),outChannel,1,1);
+			kernel = new Blob(outChannel,kernelSize,kernelSize);
+			bias = new Blob(outChannel);
 			//init params
 			MathFunctions.gaussianInitData(kernel.getData());
 			MathFunctions.constantInitData(bias.getData(), 0.1f);
 		}
 		assert kernel != null && bias != null :"ConvolutionLayer prepare----- kernel is null or bias is null error";
 		z = new Blob(output.getNumbers(),output.getChannels(),output.getHeight(),output.getWidth());
-		kernelGradient = new Blob(kernel.getNumbers(),kernel.getChannels(),kernel.getHeight(),kernel.getWidth());
-		biasGradient = new Blob(bias.getNumbers(),bias.getChannels(),bias.getHeight(),bias.getWidth());
+		kernelGradient = new Blob(outChannel,kernelSize,kernelSize);
+		biasGradient = new Blob(outChannel);
 
 	}
 
@@ -165,7 +165,7 @@ public class DeepWiseConv2dLayer extends Layer{
 										int inY = inStartY + kh;
 										int inX = inStartX + kw;
 										if (inY >= 0 && inY < input.getHeight() && inX >= 0 && inX < input.getWidth()){
-											kernelGradientData[kernelGradient.getIndexByParams(0,  c, kh, kw)] += inputData[input.getIndexByParams(n,inputChannelIndex , inY, inX)]
+											kernelGradientData[kernelGradient.getIndexByParams(0, c, kh, kw)] += inputData[input.getIndexByParams(n,inputChannelIndex , inY, inX)]
 													*inputDiffData[inputDiff.getIndexByParams(n, c, h, w)];
 										}
 									}
