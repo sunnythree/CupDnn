@@ -92,11 +92,11 @@ public class Cifar10Network {
 		//network.setLoss(new LogLikeHoodLoss());
 		//network.setLoss(new CrossEntropyLoss());
 		network.setLoss(new MSELoss());
-		optimizer = new SGDOptimizer(0.25f);
+		optimizer = new SGDOptimizer(0.00f);
 		network.setOptimizer(optimizer);
 		
-		buildFcNetwork();
-		//buildConvNetwork();
+		//buildFcNetwork();
+		buildConvNetwork();
 
 		network.prepare();
 	}

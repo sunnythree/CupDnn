@@ -38,17 +38,17 @@ public class MnistNetwork {
 		//给network添加网络层
 		InputLayer layer1 = new InputLayer(network,28,28,1);
 		network.addLayer(layer1);
-		FullConnectionLayer layer2 = new FullConnectionLayer(network,28*28,100);
+		FullConnectionLayer layer2 = new FullConnectionLayer(network,28*28,512);
 		layer2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(layer2);
-		FullConnectionLayer layer3 = new FullConnectionLayer(network,100,30);
+		FullConnectionLayer layer3 = new FullConnectionLayer(network,512,64);
 		layer3.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(layer3);
-		FullConnectionLayer layer4 = new FullConnectionLayer(network,30,10);
-		layer4.setActivationFunc(new SigmodActivationFunc());
+		FullConnectionLayer layer4 = new FullConnectionLayer(network,64,10);
+		layer4.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(layer4);
-		//SoftMaxLayer sflayer = new SoftMaxLayer(network,10);
-		//network.addLayer(sflayer);
+		SoftMaxLayer sflayer = new SoftMaxLayer(network,10);
+		network.addLayer(sflayer);
 	}
 	
 	private void buildConvNetwork(){
@@ -62,21 +62,25 @@ public class MnistNetwork {
 		PoolMaxLayer pool1 = new PoolMaxLayer(network,28,28,6,2,2);
 		network.addLayer(pool1);
 		
-		Conv2dLayer conv2 = new Conv2dLayer(network,14,14,6,10,3,1);
+		Conv2dLayer conv2 = new Conv2dLayer(network,14,14,6,24,3,1);
 		conv2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(conv2);
 		
-		PoolMeanLayer pool2 = new PoolMeanLayer(network,14,14,10,2,2);
+		PoolMeanLayer pool2 = new PoolMeanLayer(network,14,14,24,2,2);
 		network.addLayer(pool2);
 		
 		
-		FullConnectionLayer fc1 = new FullConnectionLayer(network,7*7*10,256);
+		FullConnectionLayer fc1 = new FullConnectionLayer(network,7*7*24,512);
 		fc1.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(fc1);
 		
-		FullConnectionLayer fc2 = new FullConnectionLayer(network,256,10);
+		FullConnectionLayer fc2 = new FullConnectionLayer(network,512,64);
 		fc2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(fc2);
+		
+		FullConnectionLayer fc3 = new FullConnectionLayer(network,64,10);
+		fc3.setActivationFunc(new ReluActivationFunc());
+		network.addLayer(fc3);
 		
 		SoftMaxLayer sflayer = new SoftMaxLayer(network,10);
 		network.addLayer(sflayer);
@@ -86,16 +90,16 @@ public class MnistNetwork {
 		//首先构建神经网络对象，并设置参数
 		network = new Network();
 		network.setThreadNum(8);
-		network.setBatch(100);
-		network.setLrAttenuation(0.8f);
+		network.setBatch(20);
+		network.setLrAttenuation(0.9f);
 		//network.setLoss(new LogLikeHoodLoss());
-		network.setLoss(new CrossEntropyLoss());
-		//network.setLoss(new MSELoss());
-		optimizer = new SGDOptimizer(0.1f);
+		//network.setLoss(new CrossEntropyLoss());
+		network.setLoss(new MSELoss());
+		optimizer = new SGDOptimizer(0.01f);
 		network.setOptimizer(optimizer);
 		
-		buildFcNetwork();
-		//buildConvNetwork();
+		//buildFcNetwork();
+		buildConvNetwork();
 
 		network.prepare();
 	}
