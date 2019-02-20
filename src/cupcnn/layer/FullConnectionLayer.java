@@ -42,10 +42,10 @@ public class FullConnectionLayer extends Layer{
 		// TODO Auto-generated method stub
 		if(w==null && b==null){
 			//表明该层公有output.get3DSize()个神经元，每个神经元和前面层的input.get3DSize()个神经元向连
-			w = new Blob(outSize,inSize,1,1);
+			w = new Blob(inSize,outSize);
 
 			//表明公有output.getChannels()个神经元，每个神经元有一个偏执
-			b = new Blob(outSize,1,1,1);
+			b = new Blob(outSize);
 
 
 			//初始化
@@ -57,10 +57,10 @@ public class FullConnectionLayer extends Layer{
 			MathFunctions.constantInitData(bData, 0.1f);
 		}
 		assert w!=null && b!=null:"FullConnectionLayer prepare---w or b is null error";
-		wGradient = new Blob(w.getNumbers(),w.getChannels(),1,1);
-		bGradient = new Blob(b.getNumbers(),b.getChannels(),1,1);
+		wGradient = new Blob(inSize,outSize);
+		bGradient = new Blob(outSize);
 		//z是个中间值，计算的时候要用到。
-		z = new Blob(mNetwork.getBatch(),outSize,1,1);
+		z = new Blob(mNetwork.getBatch(),outSize);
 	}
 
 	@Override
@@ -75,21 +75,23 @@ public class FullConnectionLayer extends Layer{
 		float[] zData = z.getData();
 		z.fillValue(0);
 		Vector<Task<Object>> workers = new Vector<Task<Object>>();
-		for(int n=0;n<input.getNumbers();n++){
+		for(int n=0;n<mNetwork.getBatch();n++){
 			workers.add(new Task<Object>(n) {
 				@Override
 			    public Object call() throws Exception {
-					for(int os=0;os<output.get3DSize();os++){//有多少个输出，当前层就有多少个神经元
+					for(int os=0;os<outSize;os++){//有多少个输出，当前层就有多少个神经元
 						//和每个神经元的权重相乘
-						for(int is=0;is<input.get3DSize();is++){
+						for(int is=0;is<inSize;is++){
 							//zData[n*output.get3DSize()+os] 表示一个批次中的第n个的第os个神经元
-							zData[n*output.get3DSize()+os] += inputData[n*input.get3DSize()+is]*wData[os*input.get3DSize()+is];
+							zData[n*outSize+os] += inputData[n*inSize+is]*wData[os*inSize+is];
 						}
 						//偏执
-						zData[n*output.get3DSize()+os] += bData[os];
+						zData[n*outSize+os] += bData[os];
 						//激活函数
 						if(activationFunc!=null){
-							outputData[n*output.get3DSize()+os] = activationFunc.active(zData[n*output.get3DSize()+os]);
+							outputData[n*outSize+os] = activationFunc.active(zData[n*outSize+os]);
+						}else {
+							outputData[n*outSize+os] = zData[n*outSize+os];
 						}
 					}
 					return null;
@@ -118,12 +120,12 @@ public class FullConnectionLayer extends Layer{
 		assert inputDiff.getSize()==z.getSize():"inputDiff.getSize()==z.getSize() error";
 		Vector<Task<Object>> workers = new Vector<Task<Object>>();
 		if(activationFunc != null){
-			for(int n=0; n < inputDiff.getNumbers();n++){
+			for(int n=0; n < mNetwork.getBatch();n++){
 				workers.add(new Task<Object>(n) {
 					@Override
 				    public Object call() throws Exception {
-						for(int ids = 0; ids < inputDiff.get3DSize(); ids++){
-							inputDiffData[n*inputDiff.get3DSize()+ids] *= activationFunc.diffActive(zData[n*inputDiff.get3DSize()+ids]);
+						for(int ids = 0; ids < outSize; ids++){
+							inputDiffData[n*outSize+ids] *= activationFunc.diffActive(zData[n*outSize+ids]);
 						}
 						return null;
 					}
@@ -135,14 +137,14 @@ public class FullConnectionLayer extends Layer{
 		//update weight
 		wGradient.fillValue(0);
 		workers.clear();
-		for(int n = 0; n < inputDiff.getNumbers(); n++){
+		for(int n = 0; n < mNetwork.getBatch(); n++){
 			workers.add(new Task<Object>(n) {
 				@Override
 			    public Object call() throws Exception {
-					for(int ids = 0; ids < inputDiff.get3DSize(); ids++){
-						for(int is = 0; is < input.get3DSize(); is++){
+					for(int ids = 0; ids < outSize; ids++){
+						for(int is = 0; is < inSize; is++){
 							//相当于一个神经元和它的每一个连接乘加
-							wGradientData[ids*input.get3DSize()+is] += inputData[n*input.get3DSize()+is] * inputDiffData[n*inputDiff.get3DSize()+ids];
+							wGradientData[ids*inSize+is] += inputData[n*inSize+is] * inputDiffData[n*outSize+ids];
 						}
 					}
 					return null;
@@ -151,31 +153,31 @@ public class FullConnectionLayer extends Layer{
 		}
 		ThreadPoolManager.getInstance(mNetwork).dispatchTask(workers);
 		//平均
-		MathFunctions.dataDivConstant(wGradientData, input.getNumbers());
+		MathFunctions.dataDivConstant(wGradientData, mNetwork.getBatch());
 		
 		//update bias
 		bGradient.fillValue(0);
-		for(int n=0;n<inputDiff.getNumbers();n++){
-			for(int bs = 0; bs < bGradient.getSize(); bs++){
-				bGradientData[bs] += inputDiffData[n*bGradient.getSize()+bs];
+		for(int n=0;n<mNetwork.getBatch();n++){
+			for(int bs = 0; bs < outSize; bs++){
+				bGradientData[bs] += inputDiffData[n*outSize+bs];
 			}
 		}
 
 		//平均
-		MathFunctions.dataDivConstant(bGradientData, input.getNumbers());
+		MathFunctions.dataDivConstant(bGradientData, mNetwork.getBatch());
 		
 		//最后，乘以当前层的权重后输出
 		//每一个输出=每一个神经元与连接他的权重的乘加
 		if(id<=1)return;
 		outputDiff.fillValue(0);
 		workers.clear();
-		for(int n = 0; n < outputDiff.getNumbers();n++){
+		for(int n = 0; n < mNetwork.getBatch();n++){
 			workers.add(new Task<Object>(n) {
 				@Override
 			    public Object call() throws Exception {
-					for(int ids = 0; ids < inputDiff.get3DSize(); ids++){
-						for(int ods = 0; ods < outputDiff.get3DSize(); ods++){
-							outputDiffData[n*outputDiff.get3DSize()+ods] += inputDiffData[n*inputDiff.get3DSize()+ids]*wData[ids*w.get3DSize()+ods];
+					for(int ids = 0; ids < outSize; ids++){
+						for(int ods = 0; ods < inSize; ods++){
+							outputDiffData[n*inSize+ods] += inputDiffData[n*outSize+ids]*wData[ids*inSize+ods];
 						}
 					}
 					return null;
@@ -250,13 +252,13 @@ public class FullConnectionLayer extends Layer{
 	@Override
 	public Blob createOutBlob() {
 		// TODO Auto-generated method stub
-		return new Blob(mNetwork.getBatch(),outSize,1,1);
+		return new Blob(mNetwork.getBatch(),outSize);
 	}
 
 	@Override
 	public Blob createDiffBlob() {
 		// TODO Auto-generated method stub
-		return new Blob(mNetwork.getBatch(),outSize,1,1);
+		return new Blob(mNetwork.getBatch(),outSize);
 	}
 
 

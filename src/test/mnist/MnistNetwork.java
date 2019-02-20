@@ -36,17 +36,15 @@ public class MnistNetwork {
 		//给network添加网络层
 		InputLayer layer1 = new InputLayer(network,28,28,1);
 		network.addLayer(layer1);
-		FullConnectionLayer layer2 = new FullConnectionLayer(network,28*28,600);
-		layer2.setActivationFunc(new ReluActivationFunc());
+		FullConnectionLayer layer2 = new FullConnectionLayer(network,28*28,100);
+		layer2.setActivationFunc(new SigmodActivationFunc());
 		network.addLayer(layer2);
-		FullConnectionLayer layer3 = new FullConnectionLayer(network,600,60);
-		layer3.setActivationFunc(new ReluActivationFunc());
+		FullConnectionLayer layer3 = new FullConnectionLayer(network,100,30);
+		layer3.setActivationFunc(new SigmodActivationFunc());
 		network.addLayer(layer3);
-		FullConnectionLayer layer4 = new FullConnectionLayer(network,60,10);
-		layer4.setActivationFunc(new ReluActivationFunc());
+		FullConnectionLayer layer4 = new FullConnectionLayer(network,30,10);
+		layer4.setActivationFunc(new SigmodActivationFunc());
 		network.addLayer(layer4);
-		SoftMaxLayer sflayer = new SoftMaxLayer(network,10);
-		network.addLayer(sflayer);
 	}
 	
 	private void buildConvNetwork(){
@@ -60,15 +58,15 @@ public class MnistNetwork {
 		PoolMaxLayer pool1 = new PoolMaxLayer(network,28,28,6,2,2);
 		network.addLayer(pool1);
 		
-		Conv2dLayer conv2 = new Conv2dLayer(network,14,14,6,6,3,1);
+		Conv2dLayer conv2 = new Conv2dLayer(network,14,14,6,36,3,1);
 		conv2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(conv2);
 		
-		PoolMeanLayer pool2 = new PoolMeanLayer(network,14,14,6,2,2);
+		PoolMeanLayer pool2 = new PoolMeanLayer(network,14,14,36,2,2);
 		network.addLayer(pool2);
 		
 		
-		FullConnectionLayer fc1 = new FullConnectionLayer(network,7*7*6,500);
+		FullConnectionLayer fc1 = new FullConnectionLayer(network,7*7*36,500);
 		fc1.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(fc1);
 		
@@ -77,32 +75,29 @@ public class MnistNetwork {
 		network.addLayer(fc2);
 		
 		FullConnectionLayer fc3 = new FullConnectionLayer(network,50,10);
-		fc3.setActivationFunc(new ReluActivationFunc());
+		fc3.setActivationFunc(new SigmodActivationFunc());
 		network.addLayer(fc3);
-		
-		SoftMaxLayer sflayer = new SoftMaxLayer(network,10);
-		network.addLayer(sflayer);
 		
 	}
 	public void buildNetwork(int numOfTrainData){
 		//首先构建神经网络对象，并设置参数
 		network = new Network();
 		network.setThreadNum(8);
-		network.setBatch(100);
-		network.setLoss(new LogLikeHoodLoss());
-		//network.setLoss(new CrossEntropyLoss());
-		optimizer = new SGDOptimizer(0.1f);
+		network.setBatch(50);
+		//network.setLoss(new LogLikeHoodLoss());
+		network.setLoss(new CrossEntropyLoss());
+		optimizer = new SGDOptimizer(1f);
 		network.setOptimizer(optimizer);
 		
-		//buildFcNetwork();
-		buildConvNetwork();
+		buildFcNetwork();
+		//buildConvNetwork();
 
 		network.prepare();
 	}
 	
 	public List<Blob> buildBlobByImageList(List<DigitImage> imageList,int start,int batch,int channel,int height,int width){
 		Blob input = new Blob(batch,channel,height,width);
-		Blob label = new Blob(batch,network.getDatas().get(network.getDatas().size()-1).get3DSize(),1,1);
+		Blob label = new Blob(batch,network.getDatas().get(network.getDatas().size()-1).getWidth());
 		label.fillValue(0);
 		float[] blobData = input.getData();
 		float[] labelData = label.getData();
@@ -114,9 +109,9 @@ public class MnistNetwork {
 				blobData[(i-start)*input.get3DSize()+j] = (imgData[j]&0xff)/128.0f-1;//normalize and centerlize(-1,1)
 			}
 			int labelValue = img.label;
-			for(int j=0;j<label.get3DSize();j++){
+			for(int j=0;j<label.getWidth();j++){
 				if(j==labelValue){
-					labelData[(i-start)*label.get3DSize()+j] = 1;
+					labelData[(i-start)*label.getWidth()+j] = 1;
 				}
 			}
 		}
@@ -139,8 +134,8 @@ public class MnistNetwork {
 	}
 	
 	private int[] getBatchOutputLabel(float[] data){
-		int[] outLabels = new int[network.getDatas().get(network.getDatas().size()-1).getNumbers()];
-		int outDataSize = network.getDatas().get(network.getDatas().size()-1).get3DSize();
+		int[] outLabels = new int[network.getDatas().get(network.getDatas().size()-1).getHeight()];
+		int outDataSize = network.getDatas().get(network.getDatas().size()-1).getWidth();
 		for(int n=0;n<outLabels.length;n++){
 			int maxIndex = 0;
 			double maxValue = 0;
@@ -223,7 +218,7 @@ public class MnistNetwork {
 			}
 		}
 		
-		double accuracy = correctCount/(float)allCount;
+		float accuracy = correctCount/(float)allCount;
 		System.out.println("test accuracy is "+accuracy+" correctCount "+correctCount+" allCount "+allCount);
 	}
 	

@@ -16,12 +16,14 @@ public class Blob implements Serializable{
 	private int width;
 	private int height;
 	private int id;
+	private int dim;
 	
 	public Blob(Blob b,boolean copy) {
 		this.numbers = b.numbers;
 		this.channels = b.channels;
 		this.height = b.height;
 		this.width = b.width;
+		this.dim = b.dim;
 		data = new float[getSize()];	
 		if(copy) {
 			for(int i=0;i<data.length;i++) {
@@ -34,11 +36,33 @@ public class Blob implements Serializable{
 		}
 	}
 	
+	public Blob(int width){
+		this.width = width;
+		this.dim = 1;
+		data = new float[width];
+	}
+	
+	public Blob(int height,int width){
+		this.height = height;
+		this.width = width;
+		this.dim = 2;
+		data = new float[get2DSize()];
+	}
+	
+	public Blob(int channels,int height,int width){
+		this.channels = channels;
+		this.height = height;
+		this.width = width;
+		this.dim = 3;
+		data = new float[get3DSize()];
+	}
+	
 	public Blob(int numbers,int channels,int height,int width){
 		this.numbers = numbers;
 		this.channels = channels;
 		this.height = height;
 		this.width = width;
+		this.dim = 4;
 		data = new float[getSize()];
 	}
 
@@ -81,7 +105,15 @@ public class Blob implements Serializable{
 	}
 	
 	public int getSize(){
-		return get4DSize();
+		if(dim==1) {
+			return width;
+		}else if(dim==2) {
+			return get2DSize();
+		}else if(dim==3) {
+			return get3DSize();
+		}else {
+			return get4DSize();
+		}
 	}
 	
 	public void setId(int id){

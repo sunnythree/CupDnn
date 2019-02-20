@@ -14,7 +14,7 @@ public class CrossEntropyLoss extends Loss {
 		for(int i=0;i<label.getSize();i++){
 			loss += labelData[i]*Math.log(outputData[i])+(1-labelData[i])*Math.log(1-outputData[i]);
 		}
-		loss = -loss/label.getNumbers();
+		loss = -loss/label.getHeight();
 		return loss;
 	}
 
@@ -27,10 +27,10 @@ public class CrossEntropyLoss extends Loss {
 		diff.fillValue(0.0f);
 		assert diffData.length == outputData.length:"CrossEntropyLoss diff --- diffData.length == outputData.length error";
 		assert labelData.length == outputData.length:"CrossEntropyLoss diff --- labelData.length == outputData.length error";
-		for(int n=0;n<output.getNumbers();n++){
-			for(int os=0;os<output.get3DSize();os++){
-				diffData[n*diff.get3DSize()+os] -= (labelData[n*label.get3DSize()+os]/outputData[n*output.get3DSize()+os]
-						-(1-labelData[n*label.get3DSize()+os])/(1-outputData[n*output.get3DSize()+os]));
+		for(int n=0;n<output.getHeight();n++){
+			for(int os=0;os<output.getWidth();os++){
+				diffData[n*diff.getWidth()+os] -= (labelData[n*label.getWidth()+os]/outputData[n*output.getWidth()+os]
+						-(1-labelData[n*label.getWidth()+os])/(1-outputData[n*output.getWidth()+os]));
 			}
 		}
 	}
