@@ -6,14 +6,13 @@ public class ReluActivationFunc extends ActivationFunc {
 	@Override
 	public float active(float in) {
 		// TODO Auto-generated method stub
-		float result = in > 0 ? in:0;
-		return result;
+		return Math.max(0, in);
 	}
 
 	@Override
 	public float diffActive(float in) {
 		// TODO Auto-generated method stub
-		float result = in<=0 ? 0.01f:1.0f;
+		float result = in<=0 ? 0.0f:1.0f;
 		return result;
 	}
 	

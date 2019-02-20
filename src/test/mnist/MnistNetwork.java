@@ -87,10 +87,11 @@ public class MnistNetwork {
 		network = new Network();
 		network.setThreadNum(8);
 		network.setBatch(100);
+		network.setLrAttenuation(0.9f);
 		//network.setLoss(new LogLikeHoodLoss());
 		//network.setLoss(new CrossEntropyLoss());
 		network.setLoss(new MSELoss());
-		optimizer = new SGDOptimizer(1f);
+		optimizer = new SGDOptimizer(0.1f);
 		network.setOptimizer(optimizer);
 		
 		buildFcNetwork();

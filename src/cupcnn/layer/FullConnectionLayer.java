@@ -134,7 +134,6 @@ public class FullConnectionLayer extends Layer{
 			ThreadPoolManager.getInstance(mNetwork).dispatchTask(workers);
 		}
 
-		//update weight
 		wGradient.fillValue(0);
 		workers.clear();
 		for(int n = 0; n < mNetwork.getBatch(); n++){

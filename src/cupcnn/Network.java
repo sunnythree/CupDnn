@@ -38,6 +38,7 @@ public class Network{
 	private Optimizer optimizer;
 	private int batch = 1;
 	private int threadNum = 4;
+	private float lrAttenuation = 0.8f;
 	
 	public Network(){
 		datas = new ArrayList<Blob>();
@@ -77,7 +78,14 @@ public class Network{
 	public List<Layer> getLayers(){
 		return layers;
 	}
+	
+	public float getLrAttenuation() {
+		return lrAttenuation;
+	}
 
+	public void setLrAttenuation(float lrAttenuation) {
+		this.lrAttenuation = lrAttenuation;
+	}
 	
 	public void setLoss(Loss loss){
 		this.loss = loss;
@@ -256,8 +264,8 @@ public class Network{
 		
 			test(testLists);
 			
-			if(loclaLr>0.00001f){
-				loclaLr*=0.8f;
+			if(loclaLr>0.0001f){
+				loclaLr*=lrAttenuation;
 				optimizer.setLr(loclaLr);
 			}
 		}

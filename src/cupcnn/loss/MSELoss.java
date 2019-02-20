@@ -23,13 +23,13 @@ public class MSELoss extends Loss{
 		float[] labelData = label.getData();
 		float[] outputData = output.getData();
 		float[] diffData = diff.getData();
-		float factor = 2/(float)label.getWidth();
+		int width = label.getWidth();
+		int height = label.getHeight();
+		float factor = 2;
 		diff.fillValue(0.0f);
-		assert diffData.length == outputData.length:"MSELoss diff --- diffData.length == outputData.length error";
-		assert labelData.length == outputData.length:"MSEEntropyLoss diff --- labelData.length == outputData.length error";
-		for(int n=0;n<output.getHeight();n++){
-			for(int os=0;os<output.getWidth();os++){
-				diffData[n*diff.getWidth()+os] += factor*(outputData[n*diff.getWidth()+os]-labelData[n*diff.getWidth()+os]);
+		for(int n=0;n<height;n++){
+			for(int os=0;os<width;os++){
+				diffData[n*width+os] += factor*(outputData[n*width+os]-labelData[n*width+os]);
 			}
 		}
 	}
