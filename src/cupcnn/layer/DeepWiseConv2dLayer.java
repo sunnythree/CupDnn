@@ -204,15 +204,8 @@ public class DeepWiseConv2dLayer extends Layer{
 		outputDiff.fillValue(0);
 		MathFunctions.deepWiseConv2dSame(mNetwork,inputDiff, kernel, outputDiff);	
 		
-		paramsListW.clear();
-		paramsListW.add(kernel);
-		paramsListB.clear();
-		paramsListB.add(bias);
-		
-		gradientListW.clear();
-		gradientListW.add(kernelGradient);
-		gradientListB.clear();
-		gradientListB.add(biasGradient);
+		mNetwork.updateW(kernel, kernelGradient);
+		mNetwork.updateW(bias, biasGradient);
 	}
 
 	@Override

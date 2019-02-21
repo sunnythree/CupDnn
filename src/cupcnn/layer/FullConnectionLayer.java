@@ -185,15 +185,8 @@ public class FullConnectionLayer extends Layer{
 		}	
 		ThreadPoolManager.getInstance(mNetwork).dispatchTask(workers);
 		
-		paramsListW.clear();
-		paramsListW.add(w);
-		paramsListB.clear();
-		paramsListB.add(b);
-		
-		gradientListW.clear();
-		gradientListW.add(wGradient);
-		gradientListB.clear();
-		gradientListB.add(bGradient);
+		mNetwork.updateW(w, wGradient);
+		mNetwork.updateW(b, bGradient);
 
 	}
 

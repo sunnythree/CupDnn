@@ -23,8 +23,8 @@ public abstract class Optimizer {
 		this.lamda = lamda;
 		this.mode = mode;
 	}
-	public abstract void updateW(List<Blob> params,List<Blob> gradient);
-	public abstract void updateB(List<Blob> params,List<Blob> gradient);
+	public abstract void updateW(Blob params,Blob gradient);
+	public abstract void updateB(Blob params,Blob gradient);
 	public void setLr(float lr){
 		this.lr = lr;
 	}

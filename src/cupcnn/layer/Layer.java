@@ -22,10 +22,6 @@ public abstract class Layer{
 	//第四个：图片的宽
 	public Layer(Network network){
 		this.mNetwork = network;
-		paramsListW = new ArrayList<Blob>();
-		gradientListW = new ArrayList<Blob>();
-		paramsListB = new ArrayList<Blob>();
-		gradientListB = new ArrayList<Blob>();
 	}
 	
 	public void setId(int id){
@@ -40,20 +36,6 @@ public abstract class Layer{
 	public void setActivationFunc(ActivationFunc func){
 		this.activationFunc = func;
 	}
-	public List<Blob> getParamsWList(){
-		return paramsListW;
-	}
-	
-	public List<Blob> getGradientWList(){
-		return gradientListW;
-	}
-	public List<Blob> getParamsBList(){
-		return paramsListB;
-	}
-	
-	public List<Blob> getGradientBList(){
-		return gradientListB;
-	}	
 	//类型
 	abstract public String getType();
 
@@ -68,9 +50,4 @@ public abstract class Layer{
 	abstract public void saveModel(ObjectOutputStream out);
 	abstract public void loadModel(ObjectInputStream in);
 	
-	//用来更新参数
-	protected List<Blob> paramsListW;
-	protected List<Blob> gradientListW;
-	protected List<Blob> paramsListB;
-	protected List<Blob> gradientListB;
 }

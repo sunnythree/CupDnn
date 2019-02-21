@@ -28,77 +28,58 @@ public class SGDMOptimizer extends Optimizer {
 	}
 
 	@Override
-	public void updateB(List<Blob> params, List<Blob> gradient) {
+	public void updateB(Blob b, Blob gradient) {
 		// TODO Auto-generated method stub
-		assert params.size()==gradient.size():"params size not equal gradient size";
-		if(params.size()==0)return;
-		Blob priv = privMap.get(params.get(0));
+		Blob priv = privMap.get(b);
 		if(priv == null) {
-			priv = new Blob(params.get(0),false);
-			privMap.put(params.get(0), priv);
-		}else {
-			assert priv.getSize()==params.get(0).getSize():"momentum size error";
+			priv = new Blob(b,false);
+			privMap.put(b, priv);
 		}
 		
 		float[] privData = priv.getData();
-		
-		for(int i=0;i<params.size();i++){
-			Blob param = params.get(i);
-			Blob grad = gradient.get(i);
-			float[] paramData = param.getData();
-			float[] gradData = grad.getData();
-			assert param.getSize()==grad.getSize():"param data size not equal gradient data size";
-			for(int j=0;j<param.getSize();j++){
-				float V = momentum*privData[j]-lr*gradData[j];
-				paramData[j] += V;
-				privData[j] = V;
-			}
+		float[] bData = b.getData();
+		float[] gradData = gradient.getData();
+		for(int j=0;j<b.getSize();j++){
+			float V = momentum*privData[j]-lr*gradData[j];
+			bData[j] += V;
+			privData[j] = V;
 		}
 	}
 	@Override
-	public void updateW(List<Blob> params, List<Blob> gradient) {
+	public void updateW(Blob w, Blob gradient) {
 		// TODO Auto-generated method stub
-		assert params.size()==gradient.size():"params size not equal gradient size";
-		if(params.size()==0)return;
-		Blob priv = privMap.get(params.get(0));
+		Blob priv = privMap.get(w);
 		if(priv == null) {
-			priv = new Blob(params.get(0),false);
-			privMap.put(params.get(0), priv);
-		}else {
-			assert priv.getSize()==params.get(0).getSize():"momentum size error";
+			priv = new Blob(w,false);
+			privMap.put(w, priv);
 		}
 		float[] privData = priv.getData();
-		for(int i=0;i<params.size();i++){
-			Blob param = params.get(i);
-			Blob grad = gradient.get(i);
-			float[] paramData = param.getData();
-			float[] gradData = grad.getData();
-			assert param.getSize()==grad.getSize():"param data size not equal gradient data size";
-			if(mode==GMode.L2) {
-				for(int j=0;j<param.getSize();j++){
-					//Ìí¼Ól2Ë¥¼õ
-					float V = momentum*privData[j]-lr*lamda*paramData[j]  - lr*gradData[j];
-					paramData[j] += V;
-					privData[j] = V;
+		float[] wData = w.getData();
+		float[] gradData = gradient.getData();
+		if(mode==GMode.L2) {
+			for(int j=0;j<w.getSize();j++){
+				//Ìí¼Ól2Ë¥¼õ
+				float V = momentum*privData[j]-lr*lamda*wData[j]  - lr*gradData[j];
+				wData[j] += V;
+				privData[j] = V;
+			}
+		}else if(mode==GMode.L1){
+			for(int j=0;j<w.getSize();j++){
+				//Ìí¼Ól1Ë¥¼õ
+				float V = 0;
+				if(wData[j]>=0) {
+					V = momentum*privData[j] - lr*lamda  - lr*gradData[j];
+				}else {
+					V = momentum*privData[j] + lr*lamda - lr*gradData[j];
 				}
-			}else if(mode==GMode.L1){
-				for(int j=0;j<param.getSize();j++){
-					//Ìí¼Ól1Ë¥¼õ
-					float V = 0;
-					if(paramData[j]>=0) {
-						V = momentum*privData[j] - lr*lamda  - lr*gradData[j];
-					}else {
-						V = momentum*privData[j] + lr*lamda - lr*gradData[j];
-					}
-					paramData[j] += V;
-					privData[j] = V;
-				}				
-			}else {
-				for(int j=0;j<param.getSize();j++){
-					float V = momentum*privData[j]-lr*gradData[j];
-					paramData[j] += V;
-					privData[j] = V;
-				}
+				wData[j] += V;
+				privData[j] = V;
+			}				
+		}else {
+			for(int j=0;j<w.getSize();j++){
+				float V = momentum*privData[j]-lr*gradData[j];
+				wData[j] += V;
+				privData[j] = V;
 			}
 		}
 	}

@@ -104,6 +104,14 @@ public class Network{
 		this.optimizer = optimizer;
 	}
 	
+	public void updateW(Blob params,Blob gradient) {
+		optimizer.updateW(params, gradient);
+	}
+	
+	public void updateB(Blob params,Blob gradient) {
+		optimizer.updateW(params, gradient);
+	}
+	
 	public void prepare(){
 		for(int i=0;i<layers.size();i++){
 			Blob data = layers.get(i).createOutBlob();
@@ -128,9 +136,6 @@ public class Network{
 
 		for(int i=layers.size()-1;i>-1;i--){
 			layers.get(i).backward();
-			//使用优化器更新参数
-			optimizer.updateW(layers.get(i).getParamsWList(), layers.get(i).getGradientWList());
-			optimizer.updateB(layers.get(i).getParamsBList(), layers.get(i).getGradientBList());
 		}
 	}
 	
