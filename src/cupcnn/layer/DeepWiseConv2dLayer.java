@@ -60,7 +60,6 @@ public class DeepWiseConv2dLayer extends Layer{
 	@Override
 	public void prepare() {
 		// TODO Auto-generated method stub
-		Blob output = mNetwork.getDatas().get(id);
 		//layerParams.getHeight()表示该层需要提取的特征数量
 		if(kernel ==null && bias == null){
 			kernel = new Blob(outChannel,kernelSize,kernelSize);
@@ -70,7 +69,7 @@ public class DeepWiseConv2dLayer extends Layer{
 			MathFunctions.constantInitData(bias.getData(), 0.1f);
 		}
 		assert kernel != null && bias != null :"ConvolutionLayer prepare----- kernel is null or bias is null error";
-		z = new Blob(output.getNumbers(),output.getChannels(),output.getHeight(),output.getWidth());
+		z = new Blob(mNetwork.getBatch(),outChannel,height,width);
 		kernelGradient = new Blob(outChannel,kernelSize,kernelSize);
 		biasGradient = new Blob(outChannel);
 
@@ -83,11 +82,12 @@ public class DeepWiseConv2dLayer extends Layer{
 		Blob output = mNetwork.getDatas().get(id);
 		float [] outputData = output.getData();
 		float [] zData = z.getData();
-		//卷积后的结果存贮在z中
-		z.fillValue(0);
-		MathFunctions.deepWiseConv2dSame(mNetwork,input, kernel, bias, z);
+		
 		//激活函数
 		if(activationFunc!=null){
+			//卷积后的结果存贮在z中
+			z.fillValue(0);
+			MathFunctions.deepWiseConv2dSame(mNetwork,input, kernel, bias, z);
 			Vector<Task<Object>> workers = new Vector<Task<Object>>();
 			for(int n=0;n<output.getNumbers();n++){
 				workers.add(new Task<Object>(n) {
@@ -105,6 +105,10 @@ public class DeepWiseConv2dLayer extends Layer{
 				});
 			}
 			ThreadPoolManager.getInstance(mNetwork).dispatchTask(workers);
+		}else {
+			//卷积后的结果存贮在output中
+			output.fillValue(0);
+			MathFunctions.deepWiseConv2dSame(mNetwork,input, kernel, bias, output);
 		}
 	}
 
@@ -120,9 +124,9 @@ public class DeepWiseConv2dLayer extends Layer{
 		float[] inputData = input.getData();
 		float[] biasGradientData = biasGradient.getData();
 		
-		//先乘激活函数的导数,得到该层的误差
 		Vector<Task<Object>> workers = new Vector<Task<Object>>();
 		if(activationFunc!=null){
+			//先乘激活函数的导数,得到该层的误差
 			for(int n=0;n<inputDiff.getNumbers();n++){
 				workers.add(new Task<Object>(n) {
 					@Override
@@ -187,7 +191,7 @@ public class DeepWiseConv2dLayer extends Layer{
 			for(int c=0;c<inputDiff.getChannels();c++){
 				for(int h=0;h<inputDiff.getHeight();h++){
 					for(int w=0;w<inputDiff.getWidth();w++){
-						biasGradientData[bias.getIndexByParams(0, c, 0, 0)] += inputDiffData[inputDiff.getIndexByParams(n, c, h, w)];
+						biasGradientData[bias.getIndexByParams(0, 0, 0, c)] += inputDiffData[inputDiff.getIndexByParams(n, c, h, w)];
 					}
 				}
 			}
@@ -196,9 +200,7 @@ public class DeepWiseConv2dLayer extends Layer{
 		MathFunctions.dataDivConstant(biasGradientData, inputDiff.getNumbers());
 		
 		if(id<=1)return;
-		//先把kernel旋转180度
-		//Blob kernelRoate180 = MathFunctions.rotate180Blob(kernel);
-		//然后再做卷积
+		//对输入梯度再做卷积
 		outputDiff.fillValue(0);
 		MathFunctions.deepWiseConv2dSame(mNetwork,inputDiff, kernel, outputDiff);	
 		

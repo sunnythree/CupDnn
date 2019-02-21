@@ -73,7 +73,7 @@ public class MathFunctions {
 								}
 								
 								//¼ÓÆ«ÖÃ
-								outputData[output.getIndexByParams(n,c,h,w)] += biasData[bias.getIndexByParams(0, c, 0, 0)];
+								outputData[output.getIndexByParams(n,c,h,w)] += biasData[bias.getIndexByParams(0, 0, 0, c)];
 							}
 						}
 					}

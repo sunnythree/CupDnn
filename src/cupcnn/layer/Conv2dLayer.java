@@ -81,11 +81,12 @@ public class Conv2dLayer extends Layer{
 		Blob output = mNetwork.getDatas().get(id);
 		float [] outputData = output.getData();
 		float [] zData = z.getData();
-		//卷积后的结果存贮在z中
-		z.fillValue(0);
-		MathFunctions.conv2dBlobSame(mNetwork,input, kernel, bias, z);
+		
 		//激活函数
 		if(activationFunc!=null){
+			//卷积后的结果存贮在z中
+			z.fillValue(0);
+			MathFunctions.conv2dBlobSame(mNetwork,input, kernel, bias, z);
 			Vector<Task<Object>> workers = new Vector<Task<Object>>();
 			for(int n=0;n<output.getNumbers();n++){
 				workers.add(new Task<Object>(n) {
@@ -103,6 +104,10 @@ public class Conv2dLayer extends Layer{
 				});
 			}
 			ThreadPoolManager.getInstance(mNetwork).dispatchTask(workers);
+		}else {
+			//卷积后的结果存贮在output中
+			output.fillValue(0);
+			MathFunctions.deepWiseConv2dSame(mNetwork,input, kernel, bias, output);
 		}
 	}
 
