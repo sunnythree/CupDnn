@@ -54,7 +54,7 @@ public class FullConnectionLayer extends Layer{
 			//高斯分布初始化w
 			MathFunctions.gaussianInitData(wData);
 			//常量初始化b
-			MathFunctions.constantInitData(bData, 0.1f);
+			MathFunctions.constantInitData(bData, 0.001f);
 		}
 		assert w!=null && b!=null:"FullConnectionLayer prepare---w or b is null error";
 		wGradient = new Blob(inSize,outSize);

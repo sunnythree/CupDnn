@@ -101,7 +101,7 @@ public class MathFunctions {
 							for(int w=0;w<input.getWidth();w++){
 								
 								int inStartX = w - kernel.getWidth()/2;
-								int inStartY = h - kernel.getHeight() / 2;
+								int inStartY = h - kernel.getHeight()/2;
 								//和卷积核乘加
 								for(int kh=0;kh<kernel.getHeight();kh++){
 									for(int kw=0;kw<kernel.getWidth();kw++){
@@ -141,7 +141,7 @@ public class MathFunctions {
 									//然后遍历kernel,通过kernel定位输入的位置
 									//然后将输入乘以kernel
 									int inStartX = w - kernel.getWidth()/2;
-									int inStartY = h - kernel.getHeight() / 2;
+									int inStartY = h - kernel.getHeight()/2;
 									//和卷积核乘加
 									for(int kh=0;kh<kernel.getHeight();kh++){
 										for(int kw=0;kw<kernel.getWidth();kw++){

@@ -58,18 +58,16 @@ public class Conv2dLayer extends Layer{
 	@Override
 	public void prepare() {
 		// TODO Auto-generated method stub
-		Blob output = mNetwork.getDatas().get(id);
 		//layerParams.getHeight()表示该层需要提取的特征数量
 		if(kernel ==null && bias == null){
 			kernel = new Blob(inChannel*outChannel,kernelSize,kernelSize);
 			bias = new Blob(outChannel);
 			//init params
 			MathFunctions.gaussianInitData(kernel.getData());
-			MathFunctions.constantInitData(bias.getData(), 0.1f);
+			MathFunctions.constantInitData(bias.getData(), 0.001f);
 		}
-		assert kernel != null && bias != null :"ConvolutionLayer prepare----- kernel is null or bias is null error";
-		z = new Blob(output.getNumbers(),output.getChannels(),output.getHeight(),output.getWidth());
-		kernelGradient = new Blob(kernel.getChannels(),kernel.getHeight(),kernel.getWidth());
+		z = new Blob(mNetwork.getBatch(),outChannel,height,width);
+		kernelGradient = new Blob(inChannel*outChannel,kernelSize,kernelSize);
 		biasGradient = new Blob(outChannel);
 
 	}
@@ -107,7 +105,7 @@ public class Conv2dLayer extends Layer{
 		}else {
 			//卷积后的结果存贮在output中
 			output.fillValue(0);
-			MathFunctions.deepWiseConv2dSame(mNetwork,input, kernel, bias, output);
+			MathFunctions.conv2dBlobSame(mNetwork,input, kernel, bias, output);
 		}
 	}
 

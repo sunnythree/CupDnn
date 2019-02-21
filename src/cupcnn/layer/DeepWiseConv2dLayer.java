@@ -66,9 +66,8 @@ public class DeepWiseConv2dLayer extends Layer{
 			bias = new Blob(outChannel);
 			//init params
 			MathFunctions.gaussianInitData(kernel.getData());
-			MathFunctions.constantInitData(bias.getData(), 0.1f);
+			MathFunctions.constantInitData(bias.getData(), 0.001f);
 		}
-		assert kernel != null && bias != null :"ConvolutionLayer prepare----- kernel is null or bias is null error";
 		z = new Blob(mNetwork.getBatch(),outChannel,height,width);
 		kernelGradient = new Blob(outChannel,kernelSize,kernelSize);
 		biasGradient = new Blob(outChannel);
