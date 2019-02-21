@@ -55,7 +55,7 @@ public class MnistNetwork {
 		InputLayer layer1 =  new InputLayer(network,28,28,1);
 		network.addLayer(layer1);
 		
-		Conv2dLayer conv1 = new Conv2dLayer(network,28,28,1,6,5,1);
+		Conv2dLayer conv1 = new Conv2dLayer(network,28,28,1,6,3,1);
 		conv1.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(conv1);
 		
@@ -65,11 +65,10 @@ public class MnistNetwork {
 		Conv2dLayer conv2 = new Conv2dLayer(network,14,14,6,6,3,1);
 		conv2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(conv2);
-		
+	
 		PoolMeanLayer pool2 = new PoolMeanLayer(network,14,14,6,2,2);
 		network.addLayer(pool2);
-		
-		
+	
 		FullConnectionLayer fc1 = new FullConnectionLayer(network,7*7*6,256);
 		fc1.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(fc1);

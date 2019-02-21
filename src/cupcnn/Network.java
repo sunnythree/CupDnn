@@ -258,7 +258,7 @@ public class Network{
 						input.getChannel(),input.getHeight(),input.getWidth());
 				float tmpLoss = trainOnce(inputAndLabel.get(0), inputAndLabel.get(1));
 				lossValue = (lossValue+tmpLoss)/2;
-				if((i/batch)%20==0) {
+				if((i/batch)%50==0) {
 					System.out.print(".");
 				}
 			}

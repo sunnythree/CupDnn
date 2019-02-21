@@ -4,52 +4,48 @@ A Java implement of Convolutional Neural Network.
 
 ## Build a CNN Network
 ```
-	public void buildNetwork(){
-		//cteate network and set parameter
+	public void buildNetwork(int numOfTrainData){
+		//首先构建神经网络对象，并设置参数
 		network = new Network();
-		network.setBatch(100);
-		network.setLoss(new LogLikeHoodLoss());
-		//network.setLoss(new CrossEntropyLoss());
-		optimizer = new SGDOptimizer(0.1);
+		network.setThreadNum(8);
+		network.setBatch(20);
+		network.setLrAttenuation(0.9f);
+		network.setLoss(new MSELoss());
+		optimizer = new SGDOptimizer(0.1f);
 		network.setOptimizer(optimizer);
-		
-		//buildFcNetwork();
+	
 		buildConvNetwork();
 
 		network.prepare();
 	}
 	
 	private void buildConvNetwork(){
-		InputLayer layer1 = new InputLayer(network,new BlobParams(network.getBatch(),1,28,28));
+		InputLayer layer1 =  new InputLayer(network,28,28,1);
 		network.addLayer(layer1);
 		
-		ConvolutionLayer conv1 = new ConvolutionLayer(network,new BlobParams(network.getBatch(),6,28,28),new BlobParams(1,6,3,3));
+		Conv2dLayer conv1 = new Conv2dLayer(network,28,28,1,8,3,1);
 		conv1.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(conv1);
 		
-		PoolMaxLayer pool1 = new PoolMaxLayer(network,new BlobParams(network.getBatch(),6,14,14),new BlobParams(1,6,2,2),2,2);
+		PoolMaxLayer pool1 = new PoolMaxLayer(network,28,28,8,2,2);
 		network.addLayer(pool1);
 		
-		ConvolutionLayer conv2 = new ConvolutionLayer(network,new BlobParams(network.getBatch(),12,14,14),new BlobParams(1,12,3,3));
+		Conv2dLayer conv2 = new Conv2dLayer(network,14,14,8,8,3,1);
 		conv2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(conv2);
-		
-		PoolMaxLayer pool2 = new PoolMaxLayer(network,new BlobParams(network.getBatch(),12,7,7),new BlobParams(1,12,2,2),2,2);
+	
+		PoolMeanLayer pool2 = new PoolMeanLayer(network,14,14,8,2,2);
 		network.addLayer(pool2);
-		
-		FullConnectionLayer fc1 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),512,1,1));
+	
+		FullConnectionLayer fc1 = new FullConnectionLayer(network,7*7*8,256);
 		fc1.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(fc1);
 		
-		FullConnectionLayer fc2 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),64,1,1));
+		FullConnectionLayer fc2 = new FullConnectionLayer(network,256,10);
 		fc2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(fc2);
 		
-		FullConnectionLayer fc3 = new FullConnectionLayer(network,new BlobParams(network.getBatch(),10,1,1));
-		fc3.setActivationFunc(new ReluActivationFunc());
-		network.addLayer(fc3);
-		
-		SoftMaxLayer sflayer = new SoftMaxLayer(network,new BlobParams(network.getBatch(),10,1,1));
+		SoftMaxLayer sflayer = new SoftMaxLayer(network,10);
 		network.addLayer(sflayer);
 		
 	}
@@ -76,9 +72,11 @@ mnist test is offered(2017).<br />
 cifar10 test is offered(2018-12-23).
 
 ## Performance
+Can achieve 99% accuracy in mnist dataset(10 conv2d + pool max + 10 conv2d + pool mean + 256 fc + 10 fc + softmax).
+
 
 ##License
-BSD 2-Clause
+BSD 3-Clause
 	
 			
 

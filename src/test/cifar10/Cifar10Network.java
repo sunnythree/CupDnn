@@ -61,24 +61,20 @@ public class Cifar10Network {
 		PoolMaxLayer pool1 = new PoolMaxLayer(network,32,32,6,2,2);
 		network.addLayer(pool1);
 		
-		Conv2dLayer conv2 = new Conv2dLayer(network,16,16,6,24,3,1);
+		Conv2dLayer conv2 = new Conv2dLayer(network,16,16,6,6,3,1);
 		conv2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(conv2);
 		
-		PoolMeanLayer pool2 = new PoolMeanLayer(network,16,16,24,2,2);
+		PoolMeanLayer pool2 = new PoolMeanLayer(network,16,16,6,2,2);
 		network.addLayer(pool2);
 		
-		FullConnectionLayer fc1 = new FullConnectionLayer(network,8*8*24,512);
+		FullConnectionLayer fc1 = new FullConnectionLayer(network,8*8*6,256);
 		fc1.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(fc1);
 		
-		FullConnectionLayer fc2 = new FullConnectionLayer(network,512,64);
+		FullConnectionLayer fc2 = new FullConnectionLayer(network,256,10);
 		fc2.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(fc2);
-
-		FullConnectionLayer fc3 = new FullConnectionLayer(network,64,10);
-		fc3.setActivationFunc(new ReluActivationFunc());
-		network.addLayer(fc3);
 		
 		SoftMaxLayer sflayer = new SoftMaxLayer(network,10);
 		network.addLayer(sflayer);
@@ -88,11 +84,11 @@ public class Cifar10Network {
 		//首先构建神经网络对象，并设置参数
 		network = new Network();
 		network.setThreadNum(8);
-		network.setBatch(100);
+		network.setBatch(20);
 		//network.setLoss(new LogLikeHoodLoss());
 		//network.setLoss(new CrossEntropyLoss());
 		network.setLoss(new MSELoss());
-		optimizer = new SGDOptimizer(0.00f);
+		optimizer = new SGDOptimizer(0.1f);
 		network.setOptimizer(optimizer);
 		
 		//buildFcNetwork();
