@@ -3,7 +3,7 @@ package test.mnist;
 import java.io.IOException;
 import java.util.List;
 
-import cupcnn.util.DigitImage;
+import cupdnn.util.DigitImage;
 import test.mnist.MnistNetwork;
 import test.mnist.ReadFile;
 
