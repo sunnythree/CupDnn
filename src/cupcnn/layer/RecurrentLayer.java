@@ -8,7 +8,7 @@ import cupcnn.data.Blob;
 
 public class RecurrentLayer extends Layer {
 	Network mNetwork;
-	Layer mCell;
+	Cell mCell;
 	int seqLen;
 	int batch;
 	int inSize;
@@ -71,7 +71,19 @@ public class RecurrentLayer extends Layer {
 	@Override
 	public void forward() {
 		// TODO Auto-generated method stub
+		Blob input = mNetwork.getDatas().get(id-1);
+		Blob output = mNetwork.getDatas().get(id);
+		float[] inputData = input.getData();
+		float[] outputData = output.getData();
+		Blob tmpIn = new Blob(batch,inSize);
+		Blob tmpOut = new Blob(batch,inSize);
 		for(int i=0;i<seqLen;i++) {
+			float[] tmpData = tmpIn.getData();
+			int tmpSize = tmpIn.getSize();
+			for(int j=0;j<tmpSize;j++) {
+				tmpData[j] = inputData[seqLen*tmpSize+j];
+			}
+			mCell.forward(tmpIn,tmpOut);
 			
 		}
 	}

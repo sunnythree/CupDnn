@@ -6,26 +6,12 @@ import java.io.ObjectOutputStream;
 import cupcnn.Network;
 import cupcnn.data.Blob;
 
-public class RnnCell extends Cell{
-	private int inSize;
-	private int outSize;
-	private int batch;
-	private Network mNetwork;
+public class Cell extends Layer{
 
-	public RnnCell(Network network) {
+	public Cell(Network network) {
 		super(network);
 		// TODO Auto-generated constructor stub
 	}
-	
-	public RnnCell(Network network,Layer recurrentLayer,int inSize,int outSize) {
-		super(network);
-		// TODO Auto-generated constructor stub
-		this.inSize = inSize;
-		this.outSize = outSize;
-		this.batch = network.getBatch();
-		this.mNetwork = network;
-	}
-	
 
 	@Override
 	public Blob createOutBlob() {
@@ -54,18 +40,23 @@ public class RnnCell extends Cell{
 	@Override
 	public void forward() {
 		// TODO Auto-generated method stub
-	
-	}
-
-	public void forward(Blob in,Blob out) {
 		
 	}
-	
+
 	@Override
 	public void backward() {
 		// TODO Auto-generated method stub
 		
 	}
+	
+	public void forward(Blob in,Blob out) {
+		
+	}
+	
+	public void backward(Blob in,Blob out,Blob inDiff,Blob outDiff) {
+		
+	}
+	
 
 	@Override
 	public void saveModel(ObjectOutputStream out) {
