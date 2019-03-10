@@ -1,5 +1,6 @@
 package cupcnn.layer;
 
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
@@ -137,13 +138,28 @@ public class RecurrentLayer extends Layer {
 	@Override
 	public void saveModel(ObjectOutputStream out) {
 		// TODO Auto-generated method stub
-		
+		try {
+			out.writeUTF(getType());
+			out.writeInt(seqLen);
+			out.writeInt(inSize);
+			out.writeInt(outSize);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	public void loadModel(ObjectInputStream in) {
 		// TODO Auto-generated method stub
-		
+		try {
+			seqLen = in.readInt();
+			inSize = in.readInt();
+			outSize = in.readInt();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }
