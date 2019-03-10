@@ -95,7 +95,43 @@ public class RecurrentLayer extends Layer {
 	@Override
 	public void backward() {
 		// TODO Auto-generated method stub
-		
+		Blob inputDiff = mNetwork.getDiffs().get(id);
+		Blob outputDiff = mNetwork.getDiffs().get(id-1);
+		Blob input = mNetwork.getDatas().get(id-1);
+		Blob output = mNetwork.getDatas().get(id);
+		Blob tmpIn = new Blob(batch,inSize);
+		Blob tmpOut = new Blob(batch,inSize);
+		Blob tmpInDiff = new Blob(batch,outSize);
+		Blob tmpOutDiff = new Blob(batch,inSize);
+		float[] inputData = input.getData();
+		float[] outputData = output.getData();
+		float[] inputDiffData = inputDiff.getData();
+		float[] outputDiffData = outputDiff.getData();
+		for(int i=0;i<seqLen;i++) {
+			//一次取序列中的一个
+			float[] tmpInData = tmpIn.getData();
+			int tmpInSize = tmpIn.getSize();
+			for(int j=0;j<tmpInSize;j++) {
+				tmpInData[j] = inputData[seqLen*tmpInSize+j];
+			}
+			float[] tmpOutData = tmpOut.getData();
+			int tmpOutSize = tmpOut.getSize();
+			for(int j=0;j<tmpOutSize;j++) {
+				tmpOutData[j] = outputData[seqLen*tmpOutSize+j];
+			}
+			float[] tmpInDiffData = tmpInDiff.getData();
+			int tmpInDiffSize = tmpIn.getSize();
+			for(int j=0;j<tmpInDiffSize;j++) {
+				tmpInDiffData[j] = inputData[seqLen*tmpInDiffSize+j];
+			}
+			mCell.backward(tmpIn,tmpOut,tmpInDiff,tmpOutDiff);
+			//将计算的结果按顺序拷贝回outputDiffBlob
+			float[] tmpOutDiffData = tmpOutDiff.getData();
+			int tmpOutDifftSize = tmpOutDiff.getSize();
+			for(int j=0;j<tmpOutDifftSize;j++) {
+				outputDiffData[seqLen*tmpOutDifftSize+j] = tmpOutDiffData[j];
+			}
+		}
 	}
 
 	@Override
