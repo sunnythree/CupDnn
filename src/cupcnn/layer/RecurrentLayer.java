@@ -78,13 +78,17 @@ public class RecurrentLayer extends Layer {
 		Blob tmpIn = new Blob(batch,inSize);
 		Blob tmpOut = new Blob(batch,inSize);
 		for(int i=0;i<seqLen;i++) {
-			float[] tmpData = tmpIn.getData();
-			int tmpSize = tmpIn.getSize();
-			for(int j=0;j<tmpSize;j++) {
-				tmpData[j] = inputData[seqLen*tmpSize+j];
+			float[] tmpInData = tmpIn.getData();
+			int tmpInSize = tmpIn.getSize();
+			for(int j=0;j<tmpInSize;j++) {
+				tmpInData[j] = inputData[seqLen*tmpInSize+j];
 			}
 			mCell.forward(tmpIn,tmpOut);
-			
+			float[] tmpOutData = tmpOut.getData();
+			int tmpOutSize = tmpOut.getSize();
+			for(int j=0;j<tmpOutSize;j++) {
+				outputData[seqLen*tmpOutSize+j] = tmpOutData[j];
+			}
 		}
 	}
 
