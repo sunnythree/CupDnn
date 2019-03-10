@@ -38,7 +38,7 @@ public class RnnCell extends Cell{
 	private Blob c;
 	private Blob cW;
 	private Blob z;
-	private ActivationFunc activeFunc;
+	private ActivationFunc tanh;
 
 	public RnnCell(Network network) {
 		super(network);
@@ -52,7 +52,7 @@ public class RnnCell extends Cell{
 		this.outSize = outSize;
 		this.batch = network.getBatch();
 		this.mNetwork = network;
-		this.activeFunc = new TanhActivationFunc();
+		this.tanh = new TanhActivationFunc();
 	}
 	
 
@@ -112,7 +112,45 @@ public class RnnCell extends Cell{
 	}
 
 	public void forward(Blob in,Blob out) {
-		
+		float[] inData = in.getData();
+		float[] outData = out.getData();
+		float[] UData = U.getData();
+		float[] WData = W.getData();
+		float[] VData = V.getData();
+		float[] biasData = bias.getData();
+		float[] cData = c.getData();
+		float[] Ht_1Data = Ht_1.getData();
+		float[] zData = z.getData();
+		for(int i=0;i<batch;i++) {
+			for(int j=0;j<outSize;j++) {
+				float nextState = 0;
+				//U*in
+				for(int k=0;k<inSize;k++) {
+					nextState += inData[i*inSize+k]*UData[j*inSize+k];
+				}
+				//W*ht-1
+				for(int k=0;k<outSize;k++) {
+					nextState += Ht_1Data[i*outSize+k]*WData[j*outSize+k];
+				}
+				//add bias
+				nextState += biasData[j];
+				zData[i*outSize+j] = nextState;
+				Ht_1Data[i*outSize+j] = tanh.active(nextState);
+			}
+		}
+		//V*ht+b
+		for(int i=0;i<batch;i++) {
+			float outTmp = 0;
+			for(int j=0;j<outSize;j++) {
+				//W*ht
+				for(int k=0;k<outSize;k++) {
+					outTmp += VData[j*outSize+k]*Ht_1Data[i*outSize+k];
+				}
+				//add bias
+				outTmp += cData[j];
+				outData[i*outSize+j] = outTmp;
+			}
+		}
 	}
 	
 	@Override
