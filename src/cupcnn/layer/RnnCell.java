@@ -4,13 +4,41 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 import cupcnn.Network;
+import cupcnn.active.ActivationFunc;
+import cupcnn.active.TanhActivationFunc;
 import cupcnn.data.Blob;
+import cupcnn.util.MathFunctions;
 
+/* Computes the following operations:
+ * y(t-1)    y(t)
+ *   ^        ^
+ *   |V+c     | V+c
+ * h(t-1) -> h(t)
+ *   ^ +b W   ^ +b
+ *   |U       |U
+ * x(t-1)    x(t)
+ *
+ * h(t) = tanh(b + W*h(t-1) + U*x(t)) (1)
+ * y(t) = c + V*h(t)                  (2)
+*/ 
 public class RnnCell extends Cell{
 	private int inSize;
 	private int outSize;
 	private int batch;
 	private Network mNetwork;
+	private Blob Ht_1;
+	private Blob U;
+	private Blob UW;
+	private Blob W;
+	private Blob WW;
+	private Blob V; 
+	private Blob VW;
+	private Blob bias;
+	private Blob biasW;
+	private Blob c;
+	private Blob cW;
+	private Blob z;
+	private ActivationFunc activeFunc;
 
 	public RnnCell(Network network) {
 		super(network);
@@ -24,6 +52,7 @@ public class RnnCell extends Cell{
 		this.outSize = outSize;
 		this.batch = network.getBatch();
 		this.mNetwork = network;
+		this.activeFunc = new TanhActivationFunc();
 	}
 	
 
@@ -48,13 +77,38 @@ public class RnnCell extends Cell{
 	@Override
 	public void prepare() {
 		// TODO Auto-generated method stub
+		//表明该层公有outSize个神经元，每个神经元和前面层的inSize个神经元向连
+		U = new Blob(inSize,outSize);
+		UW = new Blob(inSize,outSize);
+
+		//表明该层有outSize个神经元，每个神经元有一个偏执
+		bias = new Blob(outSize);
+		biasW = new Blob(outSize);
 		
+		W = new Blob(outSize,outSize);
+		WW = new Blob(outSize,outSize);
+		
+		V = new Blob(outSize,outSize);
+		VW = new Blob(outSize,outSize);
+		c = new Blob(outSize);
+		cW = new Blob(outSize);
+
+		//初始化
+		//高斯分布初始化
+		MathFunctions.gaussianInitData(U.getData());
+		MathFunctions.gaussianInitData(W.getData());
+		MathFunctions.gaussianInitData(V.getData());
+		//常量初始化b
+		MathFunctions.constantInitData(bias.getData(), 0.0f);
+		MathFunctions.constantInitData(c.getData(), 0.0f);
+		//z是个中间值，计算的时候要用到。
+		z = new Blob(mNetwork.getBatch(),outSize);
 	}
 
 	@Override
 	public void forward() {
 		// TODO Auto-generated method stub
-	
+		
 	}
 
 	public void forward(Blob in,Blob out) {
@@ -64,6 +118,10 @@ public class RnnCell extends Cell{
 	@Override
 	public void backward() {
 		// TODO Auto-generated method stub
+		
+	}
+	
+	public void backward(Blob in,Blob out,Blob inDiff,Blob outDiff) {
 		
 	}
 

@@ -41,10 +41,10 @@ public class FullConnectionLayer extends Layer{
 	public void prepare() {
 		// TODO Auto-generated method stub
 		if(w==null && b==null){
-			//表明该层公有output.get3DSize()个神经元，每个神经元和前面层的input.get3DSize()个神经元向连
+			//表明该层公有outSize个神经元，每个神经元和前面层的inSize个神经元向连
 			w = new Blob(inSize,outSize);
 
-			//表明公有output.getChannels()个神经元，每个神经元有一个偏执
+			//表明该层有outSize个神经元，每个神经元有一个偏执
 			b = new Blob(outSize);
 
 
