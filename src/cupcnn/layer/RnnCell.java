@@ -148,9 +148,14 @@ public class RnnCell extends Cell{
 				}
 				//add bias
 				outTmp += cData[j];
-				outData[i*outSize+j] = outTmp;
+				outData[i*outSize+j] = outTmp; 
 			}
 		}
+	}
+	
+	@Override
+	public void resetState() {
+		Ht_1.fillValue(0);
 	}
 	
 	@Override
@@ -160,7 +165,10 @@ public class RnnCell extends Cell{
 	}
 	
 	public void backward(Blob in,Blob out,Blob inDiff,Blob outDiff) {
-		
+		float[] inData = in.getData();
+		float[] outData = out.getData();
+		float[] inDiffData = inDiff.getData();
+		float[] outDiffData = outDiff.getData();
 	}
 
 	@Override

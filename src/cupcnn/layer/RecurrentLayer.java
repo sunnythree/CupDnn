@@ -109,6 +109,9 @@ public class RecurrentLayer extends Layer {
 		float[] inputDiffData = inputDiff.getData();
 		float[] outputDiffData = outputDiff.getData();
 		for(int i=0;i<seqLen;i++) {
+			if(i==0) {
+				mCell.resetState(); 
+			}
 			//一次取序列中的一个
 			float[] tmpInData = tmpIn.getData();
 			int tmpInSize = tmpIn.getSize();

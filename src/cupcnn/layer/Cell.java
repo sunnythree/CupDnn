@@ -57,6 +57,9 @@ public class Cell extends Layer{
 		
 	}
 	
+	public void resetState() {
+		
+	}
 
 	@Override
 	public void saveModel(ObjectOutputStream out) {

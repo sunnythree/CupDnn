@@ -75,7 +75,8 @@ public class FullConnectionLayer extends Layer{
 		float[] zData = z.getData();
 		z.fillValue(0);
 		Vector<Task<Object>> workers = new Vector<Task<Object>>();
-		for(int n=0;n<mNetwork.getBatch();n++){
+		int batch = inputData.length/inSize;
+		for(int n=0;n<batch;n++){
 			workers.add(new Task<Object>(n) {
 				@Override
 			    public Object call() throws Exception {
@@ -118,9 +119,10 @@ public class FullConnectionLayer extends Layer{
 		//update diff
 		//先乘激活函数的偏导数,即可求出当前层的误差
 		assert inputDiff.getSize()==z.getSize():"inputDiff.getSize()==z.getSize() error";
+		int batch = inputData.length/inSize;
 		Vector<Task<Object>> workers = new Vector<Task<Object>>();
 		if(activationFunc != null){
-			for(int n=0; n < mNetwork.getBatch();n++){
+			for(int n=0; n < batch;n++){
 				workers.add(new Task<Object>(n) {
 					@Override
 				    public Object call() throws Exception {
@@ -136,7 +138,7 @@ public class FullConnectionLayer extends Layer{
 
 		wGradient.fillValue(0);
 		workers.clear();
-		for(int n = 0; n < mNetwork.getBatch(); n++){
+		for(int n = 0; n < batch; n++){
 			workers.add(new Task<Object>(n) {
 				@Override
 			    public Object call() throws Exception {
@@ -152,25 +154,25 @@ public class FullConnectionLayer extends Layer{
 		}
 		ThreadPoolManager.getInstance(mNetwork).dispatchTask(workers);
 		//平均
-		MathFunctions.dataDivConstant(wGradientData, mNetwork.getBatch());
+		MathFunctions.dataDivConstant(wGradientData, batch);
 		
 		//update bias
 		bGradient.fillValue(0);
-		for(int n=0;n<mNetwork.getBatch();n++){
+		for(int n=0;n<batch;n++){
 			for(int bs = 0; bs < outSize; bs++){
 				bGradientData[bs] += inputDiffData[n*outSize+bs];
 			}
 		}
 
 		//平均
-		MathFunctions.dataDivConstant(bGradientData, mNetwork.getBatch());
+		MathFunctions.dataDivConstant(bGradientData, batch);
 		
 		//最后，乘以当前层的权重后输出
 		//每一个输出=每一个神经元与连接他的权重的乘加
 		if(id<=1)return;
 		outputDiff.fillValue(0);
 		workers.clear();
-		for(int n = 0; n < mNetwork.getBatch();n++){
+		for(int n = 0; n < batch;n++){
 			workers.add(new Task<Object>(n) {
 				@Override
 			    public Object call() throws Exception {
