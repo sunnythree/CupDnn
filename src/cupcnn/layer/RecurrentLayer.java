@@ -13,9 +13,9 @@ public class RecurrentLayer extends Layer {
 	int seqLen;
 	int batch;
 	int inSize;
-	int outSize;
+	int hidenSize;
 	
-	enum RecurrentType{
+	public static enum RecurrentType{
 		RNN,
 		LSTM,
 		GRU
@@ -28,25 +28,25 @@ public class RecurrentLayer extends Layer {
 		// TODO Auto-generated constructor stub
 	}
 	
-	public RecurrentLayer(Network network,RecurrentType type,int seqLen,int inSize,int outSize) {
+	public RecurrentLayer(Network network,RecurrentType type,int seqLen,int inSize,int hidenSize) {
 		super(network);
 		this.mNetwork = network;
 		this.batch = network.getBatch();
 		this.inSize = inSize;
-		this.outSize = outSize;
+		this.hidenSize = hidenSize;
 		this.type = type;
 	}
 
 	@Override
 	public Blob createOutBlob() {
 		// TODO Auto-generated method stub
-		return new Blob(seqLen,batch,outSize);
+		return new Blob(seqLen,batch,hidenSize);
 	}
 
 	@Override
 	public Blob createDiffBlob() {
 		// TODO Auto-generated method stub
-		return new Blob(seqLen,batch,outSize);
+		return new Blob(seqLen,batch,hidenSize);
 	}
 
 	@Override
@@ -102,7 +102,7 @@ public class RecurrentLayer extends Layer {
 		Blob output = mNetwork.getDatas().get(id);
 		Blob tmpIn = new Blob(batch,inSize);
 		Blob tmpOut = new Blob(batch,inSize);
-		Blob tmpInDiff = new Blob(batch,outSize);
+		Blob tmpInDiff = new Blob(batch,hidenSize);
 		Blob tmpOutDiff = new Blob(batch,inSize);
 		float[] inputData = input.getData();
 		float[] outputData = output.getData();
@@ -145,7 +145,7 @@ public class RecurrentLayer extends Layer {
 			out.writeUTF(getType());
 			out.writeInt(seqLen);
 			out.writeInt(inSize);
-			out.writeInt(outSize);
+			out.writeInt(hidenSize);
 			mCell.saveModel(out);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -159,7 +159,7 @@ public class RecurrentLayer extends Layer {
 		try {
 			seqLen = in.readInt();
 			inSize = in.readInt();
-			outSize = in.readInt();
+			hidenSize = in.readInt();
 			String type = in.readUTF();
 			if(type.equals("RNN")) {
 				mCell = new RnnCell(mNetwork);

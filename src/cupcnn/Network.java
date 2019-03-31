@@ -24,6 +24,7 @@ import cupcnn.layer.PoolMeanLayer;
 import cupcnn.layer.SoftMaxLayer;
 import cupcnn.loss.Loss;
 import cupcnn.optimizer.Optimizer;
+import cupcnn.util.DataAndLabel;
 import cupcnn.util.DigitImage;
 
 
@@ -199,6 +200,25 @@ public class Network{
 		return inputAndLabel;
 	}
 	
+	public List<Blob> buildBlobByDataAndLabel(List<DataAndLabel> datalists,int start,int batch,int channel,int height,int width){
+		Blob input = new Blob(batch,channel,height,width);
+		Blob label = new Blob(batch,getDatas().get(getDatas().size()-1).getWidth());
+		label.fillValue(0);
+		float[] blobData = input.getData();
+		float[] labelData = label.getData();
+		for(int i=start;i<(batch+start);i++){
+			DataAndLabel dal = datalists.get(i);
+			float[] data = dal.data;
+			float[] ld = dal.label;
+			System.arraycopy(data, 0, blobData, (i-start)*data.length, data.length);
+			System.arraycopy(ld, 0, labelData, (i-start)*ld.length, ld.length);
+		}
+		List<Blob> inputAndLabel = new ArrayList<Blob>();
+		inputAndLabel.add(input);
+		inputAndLabel.add(label);
+		return inputAndLabel;
+	}
+	
 	private int getMaxIndexInArray(double[] data){
 		int maxIndex = 0;
 		double maxValue = 0;
@@ -243,6 +263,34 @@ public class Network{
 		System.out.println("accuracy is "+accuracy);
 	}
 	
+	public void fit(List<DataAndLabel> trainLists,int epoes,List<DataAndLabel> testLists) {
+		System.out.println("fitting...... please wait for a moment!");
+		int batch = getBatch();
+		float loclaLr = optimizer.getLr();
+		float lossValue = 0;
+		InputLayer input = (InputLayer) layers.get(0);
+		for(int e=0;e<epoes;e++){
+			Collections.shuffle(trainLists);
+			long start = System.currentTimeMillis();
+			for(int i=0;i<=trainLists.size()-batch;i+=batch){
+				List<Blob> inputAndLabel = buildBlobByDataAndLabel(trainLists,i,batch,
+						input.getChannel(),input.getHeight(),input.getWidth());
+				float tmpLoss = trainOnce(inputAndLabel.get(0), inputAndLabel.get(1));
+				lossValue = (lossValue+tmpLoss)/2;
+				if((i/batch)%50==0) {
+					System.out.print(".");
+				}
+			}
+			if(loclaLr>0.0001f){
+				loclaLr*=lrAttenuation;
+				optimizer.setLr(loclaLr);
+			}
+			if(testLists!=null) {
+				predict(testLists);
+			}
+		}
+	}
+	
 	
 	public void train(List<DigitImage> trainLists,int epoes,List<DigitImage> testLists){
 		System.out.println("training...... please wait for a moment!");
@@ -267,7 +315,9 @@ public class Network{
 			System.out.println("training...... epoe: "+e+" lossValue: "+lossValue
 					+"  "+" lr: "+optimizer.getLr()+"  "+" cost "+(System.currentTimeMillis()-start));
 		
-			test(testLists);
+			if(testLists!=null) {
+				test(testLists);
+			}
 			
 			if(loclaLr>0.0001f){
 				loclaLr*=lrAttenuation;
@@ -288,6 +338,31 @@ public class Network{
 		for(i=0;i<=imgList.size()-batch;i+=batch){
 			allCount += batch;
 			List<Blob> inputAndLabel = buildBlobByImageList(imgList,i,batch,
+					input.getChannel(),input.getHeight(),input.getWidth());
+			Blob output = predict(inputAndLabel.get(0));
+			int[] calOutLabels = getBatchOutputLabel(output.getData());
+			int[] realLabels = getBatchOutputLabel(inputAndLabel.get(1).getData());
+			for(int kk=0;kk<calOutLabels.length;kk++){
+				if(calOutLabels[kk] == realLabels[kk]){
+					correctCount++;
+				}
+			}
+		}
+		
+		float accuracy = correctCount/(float)allCount;
+		System.out.println("test accuracy is "+accuracy+" correctCount "+correctCount+" allCount "+allCount);
+	}
+	
+	public void predict(List<DataAndLabel> testLists){
+		System.out.println("predict...... please wait for a moment!");
+		int batch = getBatch();
+		int correctCount = 0;
+		int allCount = 0;
+		int i = 0;
+		InputLayer input = (InputLayer) layers.get(0);
+		for(i=0;i<=testLists.size()-batch;i+=batch){
+			allCount += batch;
+			List<Blob> inputAndLabel = buildBlobByDataAndLabel(testLists,i,batch,
 					input.getChannel(),input.getHeight(),input.getWidth());
 			Blob output = predict(inputAndLabel.get(0));
 			int[] calOutLabels = getBatchOutputLabel(output.getData());
