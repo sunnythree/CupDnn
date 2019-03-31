@@ -1,13 +1,17 @@
 package cupcnn.layer;
 
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 import cupcnn.Network;
 import cupcnn.active.ActivationFunc;
+import cupcnn.active.ReluActivationFunc;
+import cupcnn.active.SigmodActivationFunc;
 import cupcnn.active.TanhActivationFunc;
 import cupcnn.data.Blob;
 import cupcnn.util.MathFunctions;
+import cupcnn.util.Task;
 
 /* Computes the following operations:
  * y(t-1)    y(t)
@@ -39,20 +43,21 @@ public class RnnCell extends Cell{
 	private Blob cW;
 	private Blob z;
 	private ActivationFunc tanh;
+	private final String TYPE = "RNN";
 
 	public RnnCell(Network network) {
 		super(network);
 		// TODO Auto-generated constructor stub
+		this.mNetwork = network;
+		this.tanh = new TanhActivationFunc();
 	}
 	
 	public RnnCell(Network network,Layer recurrentLayer,int inSize,int outSize) {
-		super(network);
+		this(network);
 		// TODO Auto-generated constructor stub
 		this.inSize = inSize;
 		this.outSize = outSize;
 		this.batch = network.getBatch();
-		this.mNetwork = network;
-		this.tanh = new TanhActivationFunc();
 	}
 	
 
@@ -148,7 +153,6 @@ public class RnnCell extends Cell{
 				}
 				//add bias
 				outTmp += cData[j];
-				outData[i*outSize+j] = outTmp; 
 			}
 		}
 	}
@@ -169,18 +173,114 @@ public class RnnCell extends Cell{
 		float[] outData = out.getData();
 		float[] inDiffData = inDiff.getData();
 		float[] outDiffData = outDiff.getData();
+		float[] UData = U.getData();
+		float[] WData = W.getData();
+		float[] VData = V.getData();
+		float[] UWData = UW.getData();
+		float[] WWData = WW.getData();
+		float[] VWData = VW.getData();
+		float[] biasWData = biasW.getData();
+		float[] cWData = cW.getData();
+		float[] Ht_1Data = Ht_1.getData();
+		float[] zData = z.getData();
+		
+		
+		for(int n = 0; n < batch; n++){
+			for(int ids = 0; ids < outSize; ids++){
+				for(int is = 0; is < inSize; is++){
+					//相当于一个神经元和它的每一个连接乘加
+					VWData[ids*inSize+is] += Ht_1Data[n*inSize+is] * inDiffData[n*outSize+ids];
+				}
+			}
+		}
+		MathFunctions.dataDivConstant(VWData, batch);
+		MathFunctions.dataDivConstant(cWData, batch);
+		mNetwork.updateW(c, cW);
+		mNetwork.updateW(V, VW);
+		//残差继续传播
+		outDiff.fillValue(0);
+		for(int n = 0; n < batch;n++){
+			for(int ids = 0; ids < outSize; ids++){
+				for(int ods = 0; ods < inSize; ods++){
+					outDiffData[n*inSize+ods] += inDiffData[n*outSize+ids]*VData[ids*inSize+ods];
+				}
+			}
+		}
+		System.arraycopy(outDiffData, 0, inDiffData, 0, outDiffData.length);
+		
+		for(int n=0; n < batch;n++){
+			for(int ids = 0; ids < outSize; ids++){
+				inDiffData[n*outSize+ids] *= tanh.diffActive(zData[n*outSize+ids]);
+			}
+		}
+		
+		for(int i=0;i<batch;i++) {
+			for(int j=0;j<outSize;j++) {
+				biasWData[i*outSize+j] = inDiffData[i*outSize+j];
+				//input*inDiff
+				for(int k=0;k<outSize;k++) {
+					UWData[j*outSize+k] += inData[i*outSize+k]*inDiffData[i*outSize+j];
+				}
+				for(int k=0;k<outSize;k++) {
+					WWData[j*outSize+k] += inData[i*outSize+k]*inDiffData[i*outSize+j];
+				}
+			}
+		}
+		//平均
+		MathFunctions.dataDivConstant(UWData, batch);
+		MathFunctions.dataDivConstant(WWData, batch);
+		MathFunctions.dataDivConstant(biasWData, batch);
+		
+		//更新参数
+		mNetwork.updateW(U, UW);
+		mNetwork.updateW(W, WW);
+		mNetwork.updateW(bias, biasW);	
+		//残差继续传播
+		for(int n = 0; n < batch;n++){
+			for(int ids = 0; ids < outSize; ids++){
+				for(int ods = 0; ods < inSize; ods++){
+					outDiffData[n*inSize+ods] += inDiffData[n*outSize+ids]*(UData[ids*inSize+ods]+WWData[ids*inSize+ods]);
+				}
+			}
+		}
 	}
 
 	@Override
 	public void saveModel(ObjectOutputStream out) {
 		// TODO Auto-generated method stub
-		
+		try {
+			out.writeUTF(getType());
+			out.writeInt(inSize);
+			out.writeInt(outSize);
+			out.writeObject(U);
+			out.writeObject(W);
+			out.writeObject(V);
+			out.writeObject(bias);
+			out.writeObject(c);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	public void loadModel(ObjectInputStream in) {
 		// TODO Auto-generated method stub
-		
+		try {
+			inSize = in.readInt();
+			outSize = in.readInt();
+			U = (Blob) in.readObject();
+			W = (Blob) in.readObject();
+			V = (Blob) in.readObject();
+			bias = (Blob) in.readObject();
+			c = (Blob) in.readObject();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }

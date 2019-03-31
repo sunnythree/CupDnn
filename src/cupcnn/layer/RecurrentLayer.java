@@ -146,6 +146,7 @@ public class RecurrentLayer extends Layer {
 			out.writeInt(seqLen);
 			out.writeInt(inSize);
 			out.writeInt(outSize);
+			mCell.saveModel(out);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -159,6 +160,11 @@ public class RecurrentLayer extends Layer {
 			seqLen = in.readInt();
 			inSize = in.readInt();
 			outSize = in.readInt();
+			String type = in.readUTF();
+			if(type.equals("RNN")) {
+				mCell = new RnnCell(mNetwork);
+				mCell.loadModel(in);
+			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
