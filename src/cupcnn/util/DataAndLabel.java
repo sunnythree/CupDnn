@@ -4,8 +4,8 @@ public class DataAndLabel {
 	public float[] label;
 	public float[] data;
 	public DataAndLabel(int dataSize,int labelSize) {
-		label = new float[dataSize];
-		data = new float[labelSize];
+		data = new float[dataSize];
+		label = new float[labelSize];
 	}
 	public void setData(float[] d,float[] l) {
 		System.arraycopy(d, 0, data, 0, d.length);

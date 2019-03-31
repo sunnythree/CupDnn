@@ -281,6 +281,10 @@ public class Network{
 					System.out.print(".");
 				}
 			}
+			//每个epoe做一次测试
+			System.out.println();
+			System.out.println("training...... epoe: "+e+" lossValue: "+lossValue
+					+"  "+" lr: "+optimizer.getLr()+"  "+" cost "+(System.currentTimeMillis()-start));
 			if(loclaLr>0.0001f){
 				loclaLr*=lrAttenuation;
 				optimizer.setLr(loclaLr);

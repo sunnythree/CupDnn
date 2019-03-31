@@ -36,17 +36,18 @@ public class RnnTest {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		AddNetwork aw = new AddNetwork();	
+		aw.buildNetwork();
 		aw.train(genDatas(10000), 10);
 	
         Scanner sc = new Scanner(System.in);   
         
-        System.out.println("please input two numbers(-1:1)");  
+        System.out.println("please input two numbers(-1~1)");  
 		System.out.println("please input first one:");
         float a = Float.parseFloat(sc.next());
         System.out.println("please input second one:");
         float b = Float.parseFloat(sc.next());
         
-        Blob in = new Blob(0,0,0,2);
+        Blob in = new Blob(1,1,1,2);
         float[] inData = in.getData();
         inData[0] = a;
         inData[1] = b;

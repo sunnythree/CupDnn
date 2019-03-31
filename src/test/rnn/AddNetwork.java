@@ -6,6 +6,7 @@ import cupcnn.Network;
 import cupcnn.active.ReluActivationFunc;
 import cupcnn.data.Blob;
 import cupcnn.layer.FullConnectionLayer;
+import cupcnn.layer.InputLayer;
 import cupcnn.layer.RecurrentLayer;
 import cupcnn.loss.MSELoss;
 import cupcnn.optimizer.SGDOptimizer;
@@ -17,13 +18,15 @@ public class AddNetwork {
 	SGDOptimizer optimizer;
 	
 	public void buildAddNetwork() {
+		InputLayer layer1 =  new InputLayer(network,2,1,1);
+		network.addLayer(layer1);
 		RecurrentLayer rl = new RecurrentLayer(network,RecurrentLayer.RecurrentType.RNN,2,1,10);
 		network.addLayer(rl);
 		FullConnectionLayer fc = new FullConnectionLayer(network,10,1);
 		fc.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(fc);
 	}
-	public void buildNetwork(int numOfTrainData){
+	public void buildNetwork(){
 		//首先构建神经网络对象，并设置参数
 		network = new Network();
 		network.setThreadNum(4);
