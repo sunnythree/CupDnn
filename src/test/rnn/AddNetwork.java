@@ -4,6 +4,7 @@ import java.util.List;
 
 import cupcnn.Network;
 import cupcnn.active.ReluActivationFunc;
+import cupcnn.active.TanhActivationFunc;
 import cupcnn.data.Blob;
 import cupcnn.layer.FullConnectionLayer;
 import cupcnn.layer.InputLayer;
@@ -23,14 +24,13 @@ public class AddNetwork {
 		RecurrentLayer rl = new RecurrentLayer(network,RecurrentLayer.RecurrentType.RNN,2,1,10);
 		network.addLayer(rl);
 		FullConnectionLayer fc = new FullConnectionLayer(network,10,1);
-		fc.setActivationFunc(new ReluActivationFunc());
 		network.addLayer(fc);
 	}
 	public void buildNetwork(){
 		//首先构建神经网络对象，并设置参数
 		network = new Network();
 		network.setThreadNum(4);
-		network.setBatch(20);
+		network.setBatch(2);
 		network.setLrAttenuation(0.9f);
 		
 		network.setLoss(new MSELoss());

@@ -44,20 +44,22 @@ public class RnnCell extends Cell{
 	private Blob z;
 	private ActivationFunc tanh;
 	private final String TYPE = "RNN";
+	private RecurrentLayer mRecurrentLayer;
 
-	public RnnCell(Network network) {
+	public RnnCell(Network network,RecurrentLayer recurrentLayer) {
 		super(network);
 		// TODO Auto-generated constructor stub
 		this.mNetwork = network;
+		this.mRecurrentLayer = recurrentLayer;
 		this.tanh = new TanhActivationFunc();
+		this.batch = network.getBatch()/recurrentLayer.getSeqLen();
 	}
 	
-	public RnnCell(Network network,Layer recurrentLayer,int inSize,int outSize) {
-		this(network);
+	public RnnCell(Network network,RecurrentLayer recurrentLayer,int inSize,int outSize) {
+		this(network,recurrentLayer);
 		// TODO Auto-generated constructor stub
 		this.inSize = inSize;
 		this.outSize = outSize;
-		this.batch = network.getBatch();
 	}
 	
 
@@ -97,6 +99,8 @@ public class RnnCell extends Cell{
 		VW = new Blob(outSize,outSize);
 		c = new Blob(outSize);
 		cW = new Blob(outSize);
+		
+		Ht_1 = new Blob(batch,outSize);
 
 		//初始化
 		//高斯分布初始化
@@ -107,7 +111,7 @@ public class RnnCell extends Cell{
 		MathFunctions.constantInitData(bias.getData(), 0.0f);
 		MathFunctions.constantInitData(c.getData(), 0.0f);
 		//z是个中间值，计算的时候要用到。
-		z = new Blob(mNetwork.getBatch(),outSize);
+		z = new Blob(batch,outSize);
 	}
 
 	@Override
@@ -218,11 +222,11 @@ public class RnnCell extends Cell{
 			for(int j=0;j<outSize;j++) {
 				biasWData[i*outSize+j] = inDiffData[i*outSize+j];
 				//input*inDiff
-				for(int k=0;k<outSize;k++) {
-					UWData[j*outSize+k] += inData[i*outSize+k]*inDiffData[i*outSize+j];
+				for(int k=0;k<inSize;k++) {
+					UWData[j*inSize+k] += inData[i*inSize+k]*inDiffData[i*outSize+j];
 				}
-				for(int k=0;k<outSize;k++) {
-					WWData[j*outSize+k] += inData[i*outSize+k]*inDiffData[i*outSize+j];
+				for(int k=0;k<inSize;k++) {
+					WWData[j*inSize+k] += inData[i*inSize+k]*inDiffData[i*outSize+j];
 				}
 			}
 		}

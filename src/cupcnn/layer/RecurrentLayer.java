@@ -31,7 +31,8 @@ public class RecurrentLayer extends Layer {
 	public RecurrentLayer(Network network,RecurrentType type,int seqLen,int inSize,int hidenSize) {
 		super(network);
 		this.mNetwork = network;
-		this.batch = network.getBatch();
+		this.batch = network.getBatch()/seqLen;
+		this.seqLen = seqLen;
 		this.inSize = inSize;
 		this.hidenSize = hidenSize;
 		this.type = type;
@@ -60,7 +61,8 @@ public class RecurrentLayer extends Layer {
 		// TODO Auto-generated method stub
 		switch(type) {
 		case RNN:
-			mCell = new RnnCell(mNetwork);
+			mCell = new RnnCell(mNetwork,this,inSize,hidenSize);
+			mCell.prepare();
 			break;
 		case LSTM:
 			break;
@@ -81,14 +83,15 @@ public class RecurrentLayer extends Layer {
 		for(int i=0;i<seqLen;i++) {
 			float[] tmpInData = tmpIn.getData();
 			int tmpInSize = tmpIn.getSize();
+			//每次去除一个序列
 			for(int j=0;j<tmpInSize;j++) {
-				tmpInData[j] = inputData[seqLen*tmpInSize+j];
+				tmpInData[j] = inputData[i*tmpInSize+j];
 			}
 			mCell.forward(tmpIn,tmpOut);
 			float[] tmpOutData = tmpOut.getData();
 			int tmpOutSize = tmpOut.getSize();
 			for(int j=0;j<tmpOutSize;j++) {
-				outputData[seqLen*tmpOutSize+j] = tmpOutData[j];
+				outputData[i*tmpOutSize+j] = tmpOutData[j];
 			}
 		}
 	}
@@ -162,7 +165,7 @@ public class RecurrentLayer extends Layer {
 			hidenSize = in.readInt();
 			String type = in.readUTF();
 			if(type.equals("RNN")) {
-				mCell = new RnnCell(mNetwork);
+				mCell = new RnnCell(mNetwork,this);
 				mCell.loadModel(in);
 			}
 		} catch (IOException e) {
@@ -171,4 +174,7 @@ public class RecurrentLayer extends Layer {
 		}
 	}
 
+	public int getSeqLen() {
+		return seqLen;
+	}
 }

@@ -37,7 +37,7 @@ public class RnnTest {
 		// TODO Auto-generated method stub
 		AddNetwork aw = new AddNetwork();	
 		aw.buildNetwork();
-		aw.train(genDatas(10000), 10);
+		aw.train(genDatas(10000), 30);
 	
         Scanner sc = new Scanner(System.in);   
         
