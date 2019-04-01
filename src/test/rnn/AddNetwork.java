@@ -19,7 +19,7 @@ public class AddNetwork {
 	SGDOptimizer optimizer;
 	
 	public void buildAddNetwork() {
-		InputLayer layer1 =  new InputLayer(network,2,1,1);
+		InputLayer layer1 =  new InputLayer(network,1,1,1);
 		network.addLayer(layer1);
 		RecurrentLayer rl = new RecurrentLayer(network,RecurrentLayer.RecurrentType.RNN,2,1,10);
 		network.addLayer(rl);
@@ -30,7 +30,7 @@ public class AddNetwork {
 		//首先构建神经网络对象，并设置参数
 		network = new Network();
 		network.setThreadNum(4);
-		network.setBatch(2);
+		network.setBatch(24);
 		network.setLrAttenuation(0.9f);
 		
 		network.setLoss(new MSELoss());

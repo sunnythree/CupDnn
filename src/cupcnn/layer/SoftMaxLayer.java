@@ -50,7 +50,7 @@ public class SoftMaxLayer extends Layer{
 		assert input.getSize()==output.getSize():"SoftMax forward---- input.getSize()==output.getSize() error";
 	
 		Vector<Task<Object>> workers = new Vector<Task<Object>>();
-		int batch = inputData.length/size;
+		int batch = mNetwork.getBatch();
 		for(int n=0;n<batch;n++){
 			workers.add(new Task<Object>(n) {
 				@Override
@@ -105,7 +105,7 @@ public class SoftMaxLayer extends Layer{
 		//先求softmax函数的偏导数
 		outputDiff.fillValue(0);
 		Vector<Task<Object>> workers = new Vector<Task<Object>>();
-		int batch = inputDiffData.length/size;
+		int batch = mNetwork.getBatch();
 		for(int n=0;n<batch;n++){
 			workers.add(new Task<Object>(n) {
 				@Override

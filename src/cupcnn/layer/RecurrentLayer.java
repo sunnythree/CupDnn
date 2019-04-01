@@ -79,7 +79,7 @@ public class RecurrentLayer extends Layer {
 		float[] inputData = input.getData();
 		float[] outputData = output.getData();
 		Blob tmpIn = new Blob(batch,inSize);
-		Blob tmpOut = new Blob(batch,inSize);
+		Blob tmpOut = new Blob(batch,hidenSize);
 		for(int i=0;i<seqLen;i++) {
 			float[] tmpInData = tmpIn.getData();
 			int tmpInSize = tmpIn.getSize();
@@ -104,7 +104,7 @@ public class RecurrentLayer extends Layer {
 		Blob input = mNetwork.getDatas().get(id-1);
 		Blob output = mNetwork.getDatas().get(id);
 		Blob tmpIn = new Blob(batch,inSize);
-		Blob tmpOut = new Blob(batch,inSize);
+		Blob tmpOut = new Blob(batch,hidenSize);
 		Blob tmpInDiff = new Blob(batch,hidenSize);
 		Blob tmpOutDiff = new Blob(batch,inSize);
 		float[] inputData = input.getData();
@@ -119,24 +119,24 @@ public class RecurrentLayer extends Layer {
 			float[] tmpInData = tmpIn.getData();
 			int tmpInSize = tmpIn.getSize();
 			for(int j=0;j<tmpInSize;j++) {
-				tmpInData[j] = inputData[seqLen*tmpInSize+j];
+				tmpInData[j] = inputData[i*tmpInSize+j];
 			}
 			float[] tmpOutData = tmpOut.getData();
 			int tmpOutSize = tmpOut.getSize();
 			for(int j=0;j<tmpOutSize;j++) {
-				tmpOutData[j] = outputData[seqLen*tmpOutSize+j];
+				tmpOutData[j] = outputData[i*tmpOutSize+j];
 			}
 			float[] tmpInDiffData = tmpInDiff.getData();
-			int tmpInDiffSize = tmpIn.getSize();
+			int tmpInDiffSize = tmpInDiff.getSize();
 			for(int j=0;j<tmpInDiffSize;j++) {
-				tmpInDiffData[j] = inputData[seqLen*tmpInDiffSize+j];
+				tmpInDiffData[j] = inputDiffData[i*tmpInDiffSize+j];
 			}
 			mCell.backward(tmpIn,tmpOut,tmpInDiff,tmpOutDiff);
 			//将计算的结果按顺序拷贝回outputDiffBlob
 			float[] tmpOutDiffData = tmpOutDiff.getData();
 			int tmpOutDifftSize = tmpOutDiff.getSize();
 			for(int j=0;j<tmpOutDifftSize;j++) {
-				outputDiffData[seqLen*tmpOutDifftSize+j] = tmpOutDiffData[j];
+				outputDiffData[i*tmpOutDifftSize+j] = tmpOutDiffData[j];
 			}
 		}
 	}

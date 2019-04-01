@@ -12,6 +12,7 @@ import cupcnn.active.TanhActivationFunc;
 import cupcnn.data.Blob;
 import cupcnn.util.MathFunctions;
 import cupcnn.util.Task;
+import cupcnn.util.ThreadPoolManager;
 
 /* Computes the following operations:
  * y(t-1)    y(t)
@@ -31,6 +32,7 @@ public class RnnCell extends Cell{
 	private int batch;
 	private Network mNetwork;
 	private Blob Ht_1;
+	private Blob Ht_1his;
 	private Blob U;
 	private Blob UW;
 	private Blob W;
@@ -42,6 +44,7 @@ public class RnnCell extends Cell{
 	private Blob c;
 	private Blob cW;
 	private Blob z;
+	private Blob z1;
 	private ActivationFunc tanh;
 	private final String TYPE = "RNN";
 	private RecurrentLayer mRecurrentLayer;
@@ -101,7 +104,7 @@ public class RnnCell extends Cell{
 		cW = new Blob(outSize);
 		
 		Ht_1 = new Blob(batch,outSize);
-
+		Ht_1his = new Blob(batch,outSize);
 		//初始化
 		//高斯分布初始化
 		MathFunctions.gaussianInitData(U.getData());
@@ -112,6 +115,7 @@ public class RnnCell extends Cell{
 		MathFunctions.constantInitData(c.getData(), 0.0f);
 		//z是个中间值，计算的时候要用到。
 		z = new Blob(batch,outSize);
+		z1 = new Blob(batch,outSize);
 	}
 
 	@Override
@@ -129,7 +133,9 @@ public class RnnCell extends Cell{
 		float[] biasData = bias.getData();
 		float[] cData = c.getData();
 		float[] Ht_1Data = Ht_1.getData();
+		float[] Ht_1hisData = Ht_1his.getData();
 		float[] zData = z.getData();
+		float[] z1Data = z1.getData();
 		for(int i=0;i<batch;i++) {
 			for(int j=0;j<outSize;j++) {
 				float nextState = 0;
@@ -144,19 +150,23 @@ public class RnnCell extends Cell{
 				//add bias
 				nextState += biasData[j];
 				zData[i*outSize+j] = nextState;
+				//保存历史的历史，反向传播会用到
+				Ht_1hisData[i*outSize+j] = Ht_1Data[i*outSize+j];
 				Ht_1Data[i*outSize+j] = tanh.active(nextState);
 			}
 		}
 		//V*ht+b
 		for(int i=0;i<batch;i++) {
-			float outTmp = 0;
 			for(int j=0;j<outSize;j++) {
 				//W*ht
+				float outTmp = 0;
 				for(int k=0;k<outSize;k++) {
 					outTmp += VData[j*outSize+k]*Ht_1Data[i*outSize+k];
 				}
 				//add bias
 				outTmp += cData[j];
+				z1Data[i*outSize+j] = outTmp;
+				outData[i*outSize+j] = tanh.active(outTmp);;
 			}
 		}
 	}
@@ -186,47 +196,62 @@ public class RnnCell extends Cell{
 		float[] biasWData = biasW.getData();
 		float[] cWData = cW.getData();
 		float[] Ht_1Data = Ht_1.getData();
+		float[] Ht_1hisData = Ht_1his.getData();
 		float[] zData = z.getData();
+		float[] z1Data = z.getData();
 		
+		//先乘激活函数的偏导数,即可求出当前层的误差
+		for(int n=0; n < batch;n++){
+			for(int ids = 0; ids < outSize; ids++){
+				inDiffData[n*outSize+ids] *= tanh.diffActive(z1Data[n*outSize+ids]);
+			}
+		}
 		
+		VW.fillValue(0);
+		cW.fillValue(0);
 		for(int n = 0; n < batch; n++){
 			for(int ids = 0; ids < outSize; ids++){
-				for(int is = 0; is < inSize; is++){
+				cWData[ids] += inDiffData[n*outSize+ids];
+				for(int is = 0; is < outSize; is++){
 					//相当于一个神经元和它的每一个连接乘加
-					VWData[ids*inSize+is] += Ht_1Data[n*inSize+is] * inDiffData[n*outSize+ids];
+					VWData[ids*outSize+is] += Ht_1Data[n*outSize+is] * inDiffData[n*outSize+ids];
 				}
 			}
 		}
+		//calculate cWData
 		MathFunctions.dataDivConstant(VWData, batch);
 		MathFunctions.dataDivConstant(cWData, batch);
 		mNetwork.updateW(c, cW);
 		mNetwork.updateW(V, VW);
 		//残差继续传播
-		outDiff.fillValue(0);
+		Blob tmpDiff = new Blob(batch,outSize);
+		tmpDiff.fillValue(0);
+		float[] tmpDiffData = tmpDiff.getData();
 		for(int n = 0; n < batch;n++){
 			for(int ids = 0; ids < outSize; ids++){
-				for(int ods = 0; ods < inSize; ods++){
-					outDiffData[n*inSize+ods] += inDiffData[n*outSize+ids]*VData[ids*inSize+ods];
+				for(int ods = 0; ods < outSize; ods++){
+					tmpDiffData[n*outSize+ods] += inDiffData[n*outSize+ids]*VData[ids*outSize+ods];
 				}
 			}
 		}
-		System.arraycopy(outDiffData, 0, inDiffData, 0, outDiffData.length);
 		
 		for(int n=0; n < batch;n++){
 			for(int ids = 0; ids < outSize; ids++){
-				inDiffData[n*outSize+ids] *= tanh.diffActive(zData[n*outSize+ids]);
+				tmpDiffData[n*outSize+ids] *= tanh.diffActive(zData[n*outSize+ids]);
 			}
 		}
-		
+		UW.fillValue(0);
+		WW.fillValue(0);
+		biasW.fillValue(0);
 		for(int i=0;i<batch;i++) {
 			for(int j=0;j<outSize;j++) {
-				biasWData[i*outSize+j] = inDiffData[i*outSize+j];
+				biasWData[j] += tmpDiffData[i*outSize+j];
 				//input*inDiff
 				for(int k=0;k<inSize;k++) {
-					UWData[j*inSize+k] += inData[i*inSize+k]*inDiffData[i*outSize+j];
+					UWData[j*inSize+k] += inData[i*inSize+k]*tmpDiffData[i*outSize+j];
 				}
-				for(int k=0;k<inSize;k++) {
-					WWData[j*inSize+k] += inData[i*inSize+k]*inDiffData[i*outSize+j];
+				for(int k=0;k<outSize;k++) {
+					WWData[j*outSize+k] += Ht_1hisData[i*outSize+k]*tmpDiffData[i*outSize+j];
 				}
 			}
 		}
@@ -240,13 +265,15 @@ public class RnnCell extends Cell{
 		mNetwork.updateW(W, WW);
 		mNetwork.updateW(bias, biasW);	
 		//残差继续传播
+		outDiff.fillValue(0);
 		for(int n = 0; n < batch;n++){
 			for(int ids = 0; ids < outSize; ids++){
 				for(int ods = 0; ods < inSize; ods++){
-					outDiffData[n*inSize+ods] += inDiffData[n*outSize+ids]*(UData[ids*inSize+ods]+WWData[ids*inSize+ods]);
+					outDiffData[n*inSize+ods] += tmpDiffData[n*outSize+ids]*UData[ids*inSize+ods];
 				}
 			}
 		}
+		//System.out.println(outDiffData[0]);
 	}
 
 	@Override

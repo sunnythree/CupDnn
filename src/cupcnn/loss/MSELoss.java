@@ -13,7 +13,7 @@ public class MSELoss extends Loss{
 	    for (int i = 0; i < label.getSize(); ++i) {
 	    	loss += (labelData[i] - outputData[i]) * (labelData[i] - outputData[i]);
 	    } 
-
+	    //System.out.println(loss);
 	    return loss /label.getHeight();
 	}
 

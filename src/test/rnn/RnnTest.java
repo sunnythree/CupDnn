@@ -15,21 +15,29 @@ public class RnnTest {
 		Vector<DataAndLabel> dals = new Vector<DataAndLabel>();
 		Random random = new Random();
 		for(int i=0;i<samples;i++) {
-			float[] data = new float[2];
-			data[0] = random.nextFloat();
+			float a = random.nextFloat();
 			//将数据扩充到-1-->1
 			if(random.nextBoolean()) {
-				data[0] = -data[0];
+				a = -a;
 			}
-			data[1] = random.nextFloat();
+			float b = random.nextFloat();
 			if(random.nextBoolean()) {
-				data[1] = -data[1];
+				b = -b;
 			}
-			float[] label = new float[1];
-			label[0] = data[0]+data[1];
-			DataAndLabel tmp = new DataAndLabel(2,1);
-			tmp.setData(data, label);
-			dals.add(tmp);
+			float[] data1 = new float[1];
+			data1[0] = a;
+			float[] data2 = new float[1];
+			data2[0] = b;
+			float[] label1 = new float[1];
+			label1[0] = a;
+			float[] label2 = new float[1];
+			label2[0] = a+b;
+			DataAndLabel tmp1 = new DataAndLabel(1,1);
+			tmp1.setData(data1, label1);
+			dals.add(tmp1);
+			DataAndLabel tmp2 = new DataAndLabel(1,1);
+			tmp2.setData(data2, label2);
+			dals.add(tmp2);
 		}
 		return dals;
 	}
@@ -37,7 +45,7 @@ public class RnnTest {
 		// TODO Auto-generated method stub
 		AddNetwork aw = new AddNetwork();	
 		aw.buildNetwork();
-		aw.train(genDatas(10000), 30);
+		aw.train(genDatas(50000), 30);
 	
         Scanner sc = new Scanner(System.in);   
         
@@ -47,12 +55,13 @@ public class RnnTest {
         System.out.println("please input second one:");
         float b = Float.parseFloat(sc.next());
         
-        Blob in = new Blob(1,1,1,2);
+        Blob in = new Blob(1,1,1,1);
         float[] inData = in.getData();
         inData[0] = a;
-        inData[1] = b;
+        aw.predict(in);
+        inData[0] = b;
         Blob result = aw.predict(in);
         float[] resultData = result.getData();
-        System.out.println("result is : "+resultData[0]);
+        System.out.println(a+" + "+b+" = "+resultData[0]);
 	}
 }
