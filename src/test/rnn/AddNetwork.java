@@ -19,22 +19,22 @@ public class AddNetwork {
 	SGDOptimizer optimizer;
 	
 	public void buildAddNetwork() {
-		InputLayer layer1 =  new InputLayer(network,1,1,1);
+		InputLayer layer1 =  new InputLayer(network,2,1,1);
 		network.addLayer(layer1);
-		RecurrentLayer rl = new RecurrentLayer(network,RecurrentLayer.RecurrentType.RNN,2,1,10);
+		RecurrentLayer rl = new RecurrentLayer(network,RecurrentLayer.RecurrentType.RNN,2,2,100);
 		network.addLayer(rl);
-		FullConnectionLayer fc = new FullConnectionLayer(network,10,1);
+		FullConnectionLayer fc = new FullConnectionLayer(network,100,2);
 		network.addLayer(fc);
 	}
 	public void buildNetwork(){
 		//首先构建神经网络对象，并设置参数
 		network = new Network();
 		network.setThreadNum(4);
-		network.setBatch(24);
+		network.setBatch(20);
 		network.setLrAttenuation(0.9f);
 		
 		network.setLoss(new MSELoss());
-		optimizer = new SGDOptimizer(0.1f);
+		optimizer = new SGDOptimizer(0.3f);
 		network.setOptimizer(optimizer);
 		
 		buildAddNetwork();
@@ -46,6 +46,7 @@ public class AddNetwork {
 	}
 
 	public Blob predict(Blob in) {
+		network.setBatch(2);
 		return network.predict(in);
 	}
 	

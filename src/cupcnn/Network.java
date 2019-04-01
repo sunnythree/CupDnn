@@ -202,7 +202,7 @@ public class Network{
 	
 	public List<Blob> buildBlobByDataAndLabel(List<DataAndLabel> datalists,int start,int batch,int channel,int height,int width){
 		Blob input = new Blob(batch,channel,height,width);
-		Blob label = new Blob(batch,getDatas().get(getDatas().size()-1).getWidth());
+		Blob label = new Blob(batch,channel,height,width);
 		label.fillValue(0);
 		float[] blobData = input.getData();
 		float[] labelData = label.getData();

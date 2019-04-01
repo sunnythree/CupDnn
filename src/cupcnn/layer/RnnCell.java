@@ -24,7 +24,7 @@ import cupcnn.util.ThreadPoolManager;
  * x(t-1)    x(t)
  *
  * h(t) = tanh(b + W*h(t-1) + U*x(t)) (1)
- * y(t) = c + V*h(t)                  (2)
+ * y(t) = tanh(c + V*h(t))            (2)
 */ 
 public class RnnCell extends Cell{
 	private int inSize;
@@ -234,7 +234,7 @@ public class RnnCell extends Cell{
 				}
 			}
 		}
-		
+		//乘以激活函数导数得到隐藏层残差
 		for(int n=0; n < batch;n++){
 			for(int ids = 0; ids < outSize; ids++){
 				tmpDiffData[n*outSize+ids] *= tanh.diffActive(zData[n*outSize+ids]);
@@ -243,6 +243,7 @@ public class RnnCell extends Cell{
 		UW.fillValue(0);
 		WW.fillValue(0);
 		biasW.fillValue(0);
+		//同时更新隐藏层和输入层的参数
 		for(int i=0;i<batch;i++) {
 			for(int j=0;j<outSize;j++) {
 				biasWData[j] += tmpDiffData[i*outSize+j];

@@ -83,7 +83,7 @@ public class RecurrentLayer extends Layer {
 		for(int i=0;i<seqLen;i++) {
 			float[] tmpInData = tmpIn.getData();
 			int tmpInSize = tmpIn.getSize();
-			//每次去除一个序列
+			//每次去取一个序列
 			for(int j=0;j<tmpInSize;j++) {
 				tmpInData[j] = inputData[i*tmpInSize+j];
 			}
