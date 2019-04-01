@@ -40,8 +40,10 @@ public class RnnTest {
 		// TODO Auto-generated method stub
 		AddNetwork aw = new AddNetwork();	
 		aw.buildNetwork();
-		aw.train(genDatas(10000), 20);
+		aw.train(genDatas(30000), 10);
+		aw.saveModel("model/rnn_add.model");
 	
+		aw.loadModel("model/rnn_add.model");
         Scanner sc = new Scanner(System.in);   
         while(true) {
 		    System.out.println("please input two numbers(-1~1),input q to quit");  

@@ -21,6 +21,7 @@ import cupcnn.layer.InputLayer;
 import cupcnn.layer.Layer;
 import cupcnn.layer.PoolMaxLayer;
 import cupcnn.layer.PoolMeanLayer;
+import cupcnn.layer.RecurrentLayer;
 import cupcnn.layer.SoftMaxLayer;
 import cupcnn.loss.Loss;
 import cupcnn.optimizer.Optimizer;
@@ -39,7 +40,7 @@ public class Network{
 	private Optimizer optimizer;
 	private int batch = 1;
 	private int threadNum = 4;
-	private float lrAttenuation = 0.8f;
+	private float lrDecay = 0.8f;
 	
 	public Network(){
 		datas = new ArrayList<Blob>();
@@ -80,12 +81,12 @@ public class Network{
 		return layers;
 	}
 	
-	public float getLrAttenuation() {
-		return lrAttenuation;
+	public float getLrDecay() {
+		return lrDecay;
 	}
 
-	public void setLrAttenuation(float lrAttenuation) {
-		this.lrAttenuation = lrAttenuation;
+	public void setLrDecay(float decay) {
+		this.lrDecay = decay;
 	}
 	
 	public void setLoss(Loss loss){
@@ -286,7 +287,7 @@ public class Network{
 			System.out.println("training...... epoe: "+e+" lossValue: "+lossValue
 					+"  "+" lr: "+optimizer.getLr()+"  "+" cost "+(System.currentTimeMillis()-start));
 			if(loclaLr>0.0001f){
-				loclaLr*=lrAttenuation;
+				loclaLr*=lrDecay;
 				optimizer.setLr(loclaLr);
 			}
 			if(testLists!=null) {
@@ -324,7 +325,7 @@ public class Network{
 			}
 			
 			if(loclaLr>0.0001f){
-				loclaLr*=lrAttenuation;
+				loclaLr*=lrDecay;
 				optimizer.setLr(loclaLr);
 			}
 		}
@@ -460,6 +461,10 @@ public class Network{
 					SoftMaxLayer softMax = new SoftMaxLayer(Network.this);
 					softMax.loadModel(in);
 					layers.add(softMax);
+				}else if(layerType.equals(RecurrentLayer.TYPE)) {
+					RecurrentLayer recurrentLayer = new RecurrentLayer(Network.this);
+					recurrentLayer.loadModel(in);
+					layers.add(recurrentLayer);
 				}else{
 					System.out.println("load model error");
 					System.exit(-1);

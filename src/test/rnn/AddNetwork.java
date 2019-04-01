@@ -31,10 +31,10 @@ public class AddNetwork {
 		network = new Network();
 		network.setThreadNum(4);
 		network.setBatch(20);
-		network.setLrAttenuation(0.9f);
+		network.setLrDecay(0.8f);
 		
 		network.setLoss(new MSELoss());
-		optimizer = new SGDOptimizer(0.3f);
+		optimizer = new SGDOptimizer(0.5f);
 		network.setOptimizer(optimizer);
 		
 		buildAddNetwork();
@@ -46,7 +46,6 @@ public class AddNetwork {
 	}
 
 	public Blob predict(Blob in) {
-		network.setBatch(2);
 		return network.predict(in);
 	}
 	
@@ -56,6 +55,7 @@ public class AddNetwork {
 	
 	public void loadModel(String name){
 		network = new Network();
+		network.setBatch(2);
 		network.loadModel(name);
 		network.prepare();
 	}

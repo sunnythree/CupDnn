@@ -86,7 +86,7 @@ public class MnistNetwork {
 		network = new Network();
 		network.setThreadNum(8);
 		network.setBatch(20);
-		network.setLrAttenuation(0.9f);
+		network.setLrDecay(0.9f);
 		//network.setLoss(new LogLikeHoodLoss());
 		//network.setLoss(new CrossEntropyLoss());
 		network.setLoss(new MSELoss());

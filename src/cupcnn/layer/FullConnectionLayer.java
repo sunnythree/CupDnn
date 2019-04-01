@@ -56,7 +56,6 @@ public class FullConnectionLayer extends Layer{
 			//常量初始化b
 			MathFunctions.constantInitData(bData, 0.001f);
 		}
-		assert w!=null && b!=null:"FullConnectionLayer prepare---w or b is null error";
 		wGradient = new Blob(inSize,outSize);
 		bGradient = new Blob(outSize);
 		//z是个中间值，计算的时候要用到。
@@ -210,6 +209,8 @@ public class FullConnectionLayer extends Layer{
 			out.writeObject(b);
 			if(activationFunc != null){
 				out.writeUTF(activationFunc.getType());
+			}else {
+				out.writeUTF("none");
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
