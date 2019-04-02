@@ -4,10 +4,10 @@ import java.util.Random;
 import java.util.Scanner;
 import java.util.Vector;
 
-import cupcnn.Network;
-import cupcnn.data.Blob;
-import cupcnn.optimizer.SGDOptimizer;
-import cupcnn.util.DataAndLabel;
+import cupdnn.Network;
+import cupdnn.data.Blob;
+import cupdnn.optimizer.SGDOptimizer;
+import cupdnn.util.DataAndLabel;
 
 public class RnnTest {
 	
@@ -40,7 +40,7 @@ public class RnnTest {
 		// TODO Auto-generated method stub
 		AddNetwork aw = new AddNetwork();	
 		aw.buildNetwork();
-		aw.train(genDatas(30000), 10);
+		aw.train(genDatas(10000), 20);
 		aw.saveModel("model/rnn_add.model");
 	
 		aw.loadModel("model/rnn_add.model");

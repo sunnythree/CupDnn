@@ -4,7 +4,7 @@ package test.cifar10;
 import java.io.IOException;
 import java.util.List;
 
-import cupcnn.util.DigitImage;
+import cupdnn.util.DigitImage;
 import test.cifar10.Cifar10Network;
 import test.cifar10.ReadFile;
 

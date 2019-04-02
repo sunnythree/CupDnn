@@ -2,17 +2,18 @@ package test.rnn;
 
 import java.util.List;
 
-import cupcnn.Network;
-import cupcnn.active.ReluActivationFunc;
-import cupcnn.active.TanhActivationFunc;
-import cupcnn.data.Blob;
-import cupcnn.layer.FullConnectionLayer;
-import cupcnn.layer.InputLayer;
-import cupcnn.layer.RecurrentLayer;
-import cupcnn.loss.MSELoss;
-import cupcnn.optimizer.SGDOptimizer;
-import cupcnn.util.DataAndLabel;
-import cupcnn.util.DigitImage;
+import cupdnn.Network;
+import cupdnn.active.ReluActivationFunc;
+import cupdnn.active.TanhActivationFunc;
+import cupdnn.data.Blob;
+import cupdnn.layer.FullConnectionLayer;
+import cupdnn.layer.InputLayer;
+import cupdnn.layer.RecurrentLayer;
+import cupdnn.loss.CrossEntropyLoss;
+import cupdnn.loss.MSELoss;
+import cupdnn.optimizer.SGDOptimizer;
+import cupdnn.util.DataAndLabel;
+import cupdnn.util.DigitImage;
 
 public class AddNetwork {
 	Network network;
@@ -30,11 +31,11 @@ public class AddNetwork {
 		//首先构建神经网络对象，并设置参数
 		network = new Network();
 		network.setThreadNum(4);
-		network.setBatch(20);
-		network.setLrDecay(0.8f);
+		network.setBatch(100);
+		network.setLrDecay(0.7f);
 		
-		network.setLoss(new MSELoss());
-		optimizer = new SGDOptimizer(0.5f);
+		network.setLoss(new MSELoss());//CrossEntropyLoss
+		optimizer = new SGDOptimizer(0.9f);
 		network.setOptimizer(optimizer);
 		
 		buildAddNetwork();
