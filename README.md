@@ -1,5 +1,5 @@
-# CupCnn
-A Java implement of Convolutional Neural Network. 
+# CupDnn
+A Java implement of Deep Neural Network. 
 
 
 ## Build a CNN Network
@@ -51,6 +51,34 @@ A Java implement of Convolutional Neural Network.
 	}
 ```
 
+
+
+## Build a RNN Network
+```
+public void buildAddNetwork() {
+		InputLayer layer1 =  new InputLayer(network,2,1,1);
+		network.addLayer(layer1);
+		RecurrentLayer rl = new RecurrentLayer(network,RecurrentLayer.RecurrentType.RNN,2,2,100);
+		network.addLayer(rl);
+		FullConnectionLayer fc = new FullConnectionLayer(network,100,2);
+		network.addLayer(fc);
+	}
+	public void buildNetwork(){
+		//首先构建神经网络对象，并设置参数
+		network = new Network();
+		network.setThreadNum(4);
+		network.setBatch(100);
+		network.setLrDecay(0.7f);
+		
+		network.setLoss(new MSELoss());//CrossEntropyLoss
+		optimizer = new SGDOptimizer(0.9f);
+		network.setOptimizer(optimizer);
+		
+		buildAddNetwork();
+
+		network.prepare();
+	}
+```
 	
 ## Pull Request
 Pull request is welcome.
@@ -60,7 +88,7 @@ QQ group: 704153141
 
 ## Features
 1.without any dependency<br />
-2.Basic layer: input layer, conv2d layer,deepwise conv2d layer, pooling layer(MAX and MEAN), full connect layer, softmax layer<br />
+2.Basic layer: input layer, conv2d layer,deepwise conv2d layer, pooling layer(MAX and MEAN), full connect layer, softmax layer, recurrent layer <br />
 3.Loss function: Cross Entropy,log like-hood ,MSE loss<br />
 4.Optimize method: SGD(SGD without momentum),SGDM(SGD with momentum)<br />
 5.active funcs:sigmod , tanh, relu<br />
