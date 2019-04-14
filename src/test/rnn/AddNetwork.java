@@ -31,7 +31,7 @@ public class AddNetwork {
 		//首先构建神经网络对象，并设置参数
 		network = new Network();
 		network.setThreadNum(4);
-		network.setBatch(100);
+		network.setBatch(20);
 		network.setLrDecay(0.7f);
 		
 		network.setLoss(new MSELoss());//CrossEntropyLoss
