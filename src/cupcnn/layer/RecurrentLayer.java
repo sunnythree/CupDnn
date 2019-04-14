@@ -82,6 +82,9 @@ public class RecurrentLayer extends Layer {
 		Blob tmpIn = new Blob(mNetwork.getBatch()/seqLen,inSize);
 		Blob tmpOut = new Blob(mNetwork.getBatch()/seqLen,hidenSize);
 		for(int i=0;i<seqLen;i++) {
+			if(i==0) {
+				mCell.resetState();
+			}
 			float[] tmpInData = tmpIn.getData();
 			int tmpInSize = tmpIn.getSize();
 			//每次去取一个序列
@@ -113,9 +116,6 @@ public class RecurrentLayer extends Layer {
 		float[] inputDiffData = inputDiff.getData();
 		float[] outputDiffData = outputDiff.getData();
 		for(int i=0;i<seqLen;i++) {
-			if(i==0) {
-				mCell.resetState(); 
-			}
 			//一次取序列中的一个
 			float[] tmpInData = tmpIn.getData();
 			int tmpInSize = tmpIn.getSize();

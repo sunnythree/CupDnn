@@ -40,7 +40,7 @@ public class RnnTest {
 		// TODO Auto-generated method stub
 		AddNetwork aw = new AddNetwork();	
 		aw.buildNetwork();
-		aw.train(genDatas(30000), 10);
+		aw.train(genDatas(10000), 20);
 		aw.saveModel("model/rnn_add.model");
 	
 		aw.loadModel("model/rnn_add.model");

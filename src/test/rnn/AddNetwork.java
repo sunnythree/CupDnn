@@ -34,7 +34,7 @@ public class AddNetwork {
 		network.setLrDecay(0.8f);
 		
 		network.setLoss(new MSELoss());
-		optimizer = new SGDOptimizer(0.5f);
+		optimizer = new SGDOptimizer(0.8f);
 		network.setOptimizer(optimizer);
 		
 		buildAddNetwork();
